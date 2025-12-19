@@ -127,7 +127,7 @@ public class DriveController : MonoBehaviour
     void LateUpdate()
     {
         if (rb == null) return;
-        ConstrainToNavMesh();
+        //ConstrainToNavMesh();
     }
 
     private void ConstrainToNavMesh()
@@ -208,9 +208,27 @@ public class DriveController : MonoBehaviour
 
     public void Drive(float acceleration, float brake, Vector2 steer)
     {
-         // 前进
+        // 获取当前速度（在车辆前进方向上的速度分量）
+        float currentSpeed = Vector3.Dot(rb.linearVelocity, transform.forward);
+        
+        // 前进
         forwardTorque = acceleration * driveTorque;
-        brake *= brakeTorque;
+        
+        // 如果速度 <= 0 且按住刹车，则倒车
+        if (currentSpeed <= 0 && brake > 0)
+        {
+            // 应用反向扭矩（倒车）
+            forwardTorque = -brake * driveTorque;
+            brake = 0; // 倒车时不应用刹车扭矩
+            isReverse = true;
+        }
+        else
+        {
+            // 正常情况：应用刹车扭矩
+            brake *= brakeTorque;
+            isReverse = false;
+        }
+        
         steer.x = steer.x * SteeringAngle;
         /*for (int i = 0; i < wheels.Length; i++)
         {
