@@ -26,7 +26,7 @@ public class DriveController : MonoBehaviour
     
 
 
-    [Range(0, 100)]
+    /*[Range(0, 100)]
     public float speed = 10f;
     [Range(0, 100)]
     public float turnSpeed = 100f;
@@ -38,7 +38,7 @@ public class DriveController : MonoBehaviour
     public float navMeshTolerance = 0.5f;
     [Range(0, 45)]
     public float maxSlopeAngle = 30f;
-    
+    */
     [Header("Anti-Rollover")]
     [Range(-2, 0)]
     public float centerOfMassY = -0.5f; // 重心Y偏移（负值降低重心）
@@ -46,6 +46,7 @@ public class DriveController : MonoBehaviour
     public float antiRolloverForce = 3f; // 防侧翻力强度
     [Range(0, 90)]
     public float maxTiltAngle = 45f; // 最大倾斜角度（超过此角度会纠正）
+    
 
     private Rigidbody rb;
     private float horizontalInput;
@@ -94,7 +95,7 @@ public class DriveController : MonoBehaviour
         rb.MoveRotation(rb.rotation * Quaternion.Euler(0f, turnAmount, 0f));*/
     }
     
-    void PreventRollover()
+    /*void PreventRollover()
     {
         if (rb == null) return;
         
@@ -122,7 +123,7 @@ public class DriveController : MonoBehaviour
         angularVelocity.x = Mathf.Clamp(angularVelocity.x, -2f, 2f);
         angularVelocity.z = Mathf.Clamp(angularVelocity.z, -2f, 2f);
         rb.angularVelocity = angularVelocity;
-    }
+    }*/
 
     void LateUpdate()
     {
@@ -130,7 +131,7 @@ public class DriveController : MonoBehaviour
         //ConstrainToNavMesh();
     }
 
-    private void ConstrainToNavMesh()
+    /*private void ConstrainToNavMesh()
     {
         NavMeshHit hit = default;
         float[] searchRadii = { navMeshTolerance, navMeshSearchRadius, navMeshSearchRadius * 2f };
@@ -178,7 +179,7 @@ public class DriveController : MonoBehaviour
                 }
             }
         }
-    }
+    }*/
     public void OnAccelerate(InputValue button)
     {
         if(button.isPressed)

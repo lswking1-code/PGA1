@@ -26,11 +26,12 @@ public class Chasing : MonoBehaviour
     private bool isSlowedDown; // 是否处于减速状态
     private Coroutine recoverCoroutine; // 恢复速度的协程引用
 
+    public GameObject[] wheels;
+
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
-        // 如果物体没有 Rigidbody，添加一个
-        rb = GetComponent<Rigidbody>() ?? gameObject.AddComponent<Rigidbody>();
+        rb = GetComponent<Rigidbody>();
         
         // 禁用 NavMeshAgent 的自动移动，我们将手动控制
         agent.updatePosition = false;
@@ -135,6 +136,13 @@ public class Chasing : MonoBehaviour
         }
     }
 
+    private void RotateWheels()
+    {
+        for (int i = 0; i < wheels.Length; i++)
+        {
+            wheels[i].transform.Rotate(-10, 0, 0);
+        }
+    }    
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
