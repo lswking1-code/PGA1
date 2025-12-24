@@ -8,7 +8,9 @@ public class Scanner : MonoBehaviour
     public float duration = 10;
     [Range(0, 1000)]
     public float size = 500;
- 
+
+    private Coroutine expandCoroutine;
+    
     void SpawnScan()
     {
         GameObject Scanner = Instantiate(ScannerPrefab, gameObject.transform.position, Quaternion.identity) as GameObject;
@@ -20,7 +22,55 @@ public class Scanner : MonoBehaviour
             main.startSize = size;
         }
         Destroy(Scanner, duration+1);
+        
+        // 从实例化的Scanner上获取SphereCollider
+        SphereCollider sphereCollider = Scanner.GetComponent<SphereCollider>();
+        
+        if (sphereCollider != null)
+        {
+            float initialRadius = sphereCollider.radius;
+            
+            // 启动Collider扩展协程
+            if (expandCoroutine != null)
+            {
+                StopCoroutine(expandCoroutine);
+            }
+            expandCoroutine = StartCoroutine(ExpandCollider(sphereCollider, initialRadius, Scanner));
+        }
     }
+    
+    /// <summary>
+    /// 协程：逐渐放大SphereCollider的半径
+    /// </summary>
+    System.Collections.IEnumerator ExpandCollider(SphereCollider sphereCollider, float initialRadius, GameObject scannerInstance)
+    {
+        if (sphereCollider == null) yield break;
+        
+        float maxRadius = size * 0.5f; // 最大半径为size的一半
+        float elapsedTime = 0f;
+        
+        // 从初始半径逐渐放大到最大半径
+        while (elapsedTime < duration && scannerInstance != null)
+        {
+            elapsedTime += Time.deltaTime;
+            float currentRadius = Mathf.Lerp(initialRadius, maxRadius, elapsedTime / duration);
+            
+            // 检查实例是否还存在
+            if (sphereCollider != null)
+            {
+                sphereCollider.radius = currentRadius;
+            }
+            
+            yield return null;
+        }
+        
+        // 确保最终达到最大半径（如果实例还存在）
+        if (scannerInstance != null && sphereCollider != null)
+        {
+            sphereCollider.radius = maxRadius;
+        }
+    }
+   
 
     /// <summary>
     /// 新 Input System 回调：在 InputAction 中绑定的 "Scan" 行为触发时被调用
