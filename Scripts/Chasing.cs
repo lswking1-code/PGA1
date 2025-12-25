@@ -19,6 +19,9 @@ public class Chasing : MonoBehaviour
     [Range(0, 1000)] public float pushForce = 100f; // 对Player施加的力的大小
     [Range(0, 100)] public float collisionForce = 10f; // 对Chaser施加的力的大小
     [Range(0, 1000)] public float recoilForce = 50f; // 撞击玩家后敌人受到的向后力的大小
+    public float Damage = 10;
+    public float HP = 100;
+    public float SelfDamage = 20;
     
     private NavMeshAgent agent;
     private Rigidbody rb; // Rigidbody 组件，用于物理移动
@@ -190,13 +193,21 @@ public class Chasing : MonoBehaviour
             Vector3 recoilDirection = -forceDirection; // 向后方向
             rb.AddForce(recoilDirection * recoilForce, ForceMode.Impulse);
         }
+        TakeDamage(SelfDamage);
         
         // 停止之前的协程（如果存在）并重新开始计时
         if (recoverCoroutine != null)
             StopCoroutine(recoverCoroutine);
         recoverCoroutine = StartCoroutine(RecoverSpeedAfterDelay());
     }
-    
+    void TakeDamage(float damage)
+    {
+        HP -= damage;
+        if(HP <= 0)
+        {
+            Destroy(gameObject);
+        }
+    }
     // 协程：延迟后恢复速度
     System.Collections.IEnumerator RecoverSpeedAfterDelay()
     {

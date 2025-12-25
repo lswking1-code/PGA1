@@ -5,6 +5,17 @@ using UnityEngine.InputSystem;
 public class DriveController : MonoBehaviour
 {
     
+    [Header("Attributes")]
+    public float HP = 100;
+    public float MaxHP = 100;
+    public float Armor = 100;
+    public float MaxArmor = 100;
+    public float Gas = 100;
+    public float MaxGas = 100;
+    [Range(0, 1)]
+    public float GasConsumption = 1f;
+
+    
     [Header("Input")]
     public float gasInput;
     public float brakeInput;
@@ -69,8 +80,6 @@ public class DriveController : MonoBehaviour
 
     void Update()
     {
-        /*horizontalInput = Input.GetAxis("Horizontal");
-        forwardInput = Input.GetAxis("Vertical");*/
         AddDownforce();
     }
 
@@ -78,21 +87,11 @@ public class DriveController : MonoBehaviour
     {
         // 应用防侧翻控制
         //PreventRollover();
-
-        Drive(gasInput, brakeInput, steeringInput);
-        
-        // 移动
-        /*rb.AddForce(transform.forward * forwardInput * speed, ForceMode.Acceleration);
-
-        // 限制速度
-        if (rb.linearVelocity.magnitude > maxSpeed)
+        if(Gas > 0)
         {
-            rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;
+            Drive(gasInput, brakeInput, steeringInput);
+            Gas -= GasConsumption * Time.deltaTime;
         }
-
-        // 转向
-        float turnAmount = horizontalInput * turnSpeed * Time.fixedDeltaTime;
-        rb.MoveRotation(rb.rotation * Quaternion.Euler(0f, turnAmount, 0f));*/
     }
     
     /*void PreventRollover()
@@ -254,5 +253,20 @@ public class DriveController : MonoBehaviour
     public void AddDownforce()
     {
         wheelColliders[0].attachedRigidbody.AddForce(-transform.up * Downforce * wheelColliders[0].attachedRigidbody.linearVelocity.magnitude);
+    }
+    public void TakeDamage(float damage)
+    {
+        HP -= damage;
+        if(HP <= 0)
+        {
+            Destroy(gameObject);
+        }
+    }
+    void OnTriggerEnter(Collider other)
+    {
+        if(other.CompareTag("Chaser"))
+        {
+            TakeDamage(other.GetComponent<Chasing>().Damage);
+        }
     }
 }

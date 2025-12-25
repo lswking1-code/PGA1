@@ -1721,6 +1721,10 @@ PrefabInstance:
       value: 170
       objectReference: {fileID: 0}
     - target: {fileID: 2489121910504220427, guid: 361f781048f1b514494af32253bb5b60, type: 3}
+      propertyPath: GasConsumption
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2489121910504220427, guid: 361f781048f1b514494af32253bb5b60, type: 3}
       propertyPath: 'wheels.Array.data[0]'
       value: 
       objectReference: {fileID: 954955391}
