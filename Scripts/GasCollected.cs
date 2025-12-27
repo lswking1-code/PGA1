@@ -3,22 +3,21 @@ using UnityEngine.Events;
 
 public class GasCollected : MonoBehaviour
 {
-    [Header("事件设置")]
-    [Tooltip("当Player进入触发器时触发此事件")]
-    public UnityEvent OnPlayerEnter;
+    [Header("Attributes")]
+    public float Gas = 30;
+    [Header("EventRaise")]
+    public ResourceEventSO GasEvent;
+    [Header("Animation")]
+    private Animator animator;
+    
+    private bool isCollected = false; // 防止重复收集的标志
+
+    private void Start()
+    {
+        animator = GetComponent<Animator>();
+    }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     /// <summary>
     /// 当其他Collider进入触发器时调用
     /// </summary>
@@ -29,7 +28,22 @@ public class GasCollected : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             // 广播事件
-            OnPlayerEnter?.Invoke();
+            GasEvent.RaiseEvent(Gas);
+            GasCollect();
         }
+        else if(other.CompareTag("Scanner"))
+        {
+            animator.SetBool("Scan", true);
+        }
+    }
+    public void GasCollect()
+    {
+        if (isCollected) return; // 如果已经被收集，直接返回
+        isCollected = true; // 标记为已收集
+        Destroy(gameObject);
+    }
+    public void ScanFinish()
+    {
+        animator.SetBool("Scan", false);
     }
 }

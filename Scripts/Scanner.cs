@@ -3,12 +3,17 @@ using UnityEngine.InputSystem;
 
 public class Scanner : MonoBehaviour
 {
+    [Header("Effect")]
     public GameObject ScannerPrefab;
     [Range(0, 100)]
     public float duration = 10;
     [Range(0, 1000)]
     public float size = 500;
-
+    [Header("Collicion")]
+    [Range(0, 1)]
+    public float sizeProportion = 0.5f;
+    [Tooltip("控制Collider放大过程的曲线。X轴(0-1)表示时间进度，Y轴(0-1)表示插值值")]
+    public AnimationCurve expansionCurve = AnimationCurve.Linear(0, 0, 1, 1);
     private Coroutine expandCoroutine;
     
     void SpawnScan()
@@ -46,14 +51,17 @@ public class Scanner : MonoBehaviour
     {
         if (sphereCollider == null) yield break;
         
-        float maxRadius = size * 0.5f; // 最大半径为size的一半
+        float maxRadius = size * sizeProportion; 
         float elapsedTime = 0f;
         
         // 从初始半径逐渐放大到最大半径
         while (elapsedTime < duration && scannerInstance != null)
         {
             elapsedTime += Time.deltaTime;
-            float currentRadius = Mathf.Lerp(initialRadius, maxRadius, elapsedTime / duration);
+            float normalizedTime = elapsedTime / duration;
+            // 使用曲线评估插值值
+            float curveValue = expansionCurve.Evaluate(normalizedTime);
+            float currentRadius = Mathf.Lerp(initialRadius, maxRadius, curveValue);
             
             // 检查实例是否还存在
             if (sphereCollider != null)

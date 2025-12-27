@@ -4,7 +4,9 @@ using UnityEngine.InputSystem;
 
 public class DriveController : MonoBehaviour
 {
-    
+    [Header("EventListeners")]
+    public ResourceEventSO GasEvent;
+
     [Header("Attributes")]
     public float HP = 100;
     public float MaxHP = 100;
@@ -12,7 +14,7 @@ public class DriveController : MonoBehaviour
     public float MaxArmor = 100;
     public float Gas = 100;
     public float MaxGas = 100;
-    [Range(0, 1)]
+    [Range(0, 10)]
     public float GasConsumption = 1f;
 
     
@@ -62,7 +64,14 @@ public class DriveController : MonoBehaviour
     private Rigidbody rb;
     private float horizontalInput;
     private float forwardInput;
-
+    private void OnEnable()
+    {
+        GasEvent.OnEventRaised += OnGasEvent;
+    }
+    private void OnDisable()
+    {
+        GasEvent.OnEventRaised -= OnGasEvent;
+    }
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -262,11 +271,24 @@ public class DriveController : MonoBehaviour
             Destroy(gameObject);
         }
     }
+    public void OnGasEvent(float amount)
+    {
+        Gas += amount;
+        if(Gas > MaxGas)
+        {
+            Gas = MaxGas;
+        }
+    }
     void OnTriggerEnter(Collider other)
     {
         if(other.CompareTag("Chaser"))
         {
             TakeDamage(other.GetComponent<Chasing>().Damage);
         }
+        /*if(other.CompareTag("Gas"))
+        {
+            Gas += other.GetComponent<GasCollected>().Gas;
+            other.GetComponent<GasCollected>().GasCollect();
+        }*/
     }
 }
