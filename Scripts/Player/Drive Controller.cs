@@ -5,6 +5,10 @@ using UnityEngine.InputSystem;
 public class DriveController : MonoBehaviour
 {
     [Header("EventListeners")]
+    public SceneLoadEventSO sceneloadEvent;
+    public VoidEventSO afterSceneLoadedEvent;
+    public VoidEventSO LoadDataEvent;
+    public VoidEventSO backToMenuEvent;
     public ResourceEventSO GasEvent;
     public ResourceEventSO HPEvent;
 
@@ -26,11 +30,19 @@ public class DriveController : MonoBehaviour
     private float forwardInput;
     private void OnEnable()
     {
+        sceneloadEvent.LoadRequestEvent += OnloadEvent;
+        afterSceneLoadedEvent.OnEventRaised += OnAfterSceneLoadedEvent;
+        LoadDataEvent.OnEventRaised += OnloadDataEvent;
+        backToMenuEvent.OnEventRaised += OnloadDataEvent;
         GasEvent.OnEventRaised += OnGasEvent;
         HPEvent.OnEventRaised += OnHPEvent;
     }
     private void OnDisable()
     {
+        sceneloadEvent.LoadRequestEvent -= OnloadEvent;
+        afterSceneLoadedEvent.OnEventRaised -= OnAfterSceneLoadedEvent;
+        LoadDataEvent.OnEventRaised -= OnloadDataEvent;
+        backToMenuEvent.OnEventRaised -= OnloadDataEvent;
         GasEvent.OnEventRaised -= OnGasEvent;
         HPEvent.OnEventRaised -= OnHPEvent;
     }
@@ -91,7 +103,7 @@ public class DriveController : MonoBehaviour
     {
         character.HPRecovery(amount);
     }
-    void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
         if(other.CompareTag("Chaser"))
         {
@@ -102,5 +114,17 @@ public class DriveController : MonoBehaviour
             Gas += other.GetComponent<GasCollected>().Gas;
             other.GetComponent<GasCollected>().GasCollect();
         }*/
+    }
+    private void OnloadEvent(GameSceneSO sceneToLoad, Vector3 posToGo, bool fadeScreen)
+    {
+        
+    }
+    private void OnAfterSceneLoadedEvent()
+    {
+        
+    }
+    private void OnloadDataEvent()
+    {
+        
     }
 }
