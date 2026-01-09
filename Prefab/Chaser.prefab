@@ -764,16 +764,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetPosition: {x: 0, y: 0, z: 0}
   brakeSpeed: 30
+  TimeoutEvent: {fileID: 11400000, guid: ba5d621425629394cbdc7b2ac94024de, type: 2}
+  GameOverEvent: {fileID: 11400000, guid: 2a91cede4e537aa4d856cd2dade1b782, type: 2}
   wallDetectionDistance: 3
   isWall: 0
-  wallDistance: 10
-  reverseWallDistance: 15
+  wallDistance: 5
+  reverseWallDistance: 13
+  reverseSpeedThreshold: 1
+  ray1Offset1: {x: 0.5, y: 0, z: 0}
+  ray1Offset2: {x: -0.5, y: 0, z: 0}
+  ray2Offset1: {x: 0.5, y: 0, z: 0}
+  ray2Offset2: {x: -0.5, y: 0, z: 0}
   reverseDistance: 25
   stoppingDistance: 30
   stoppingSpeed: 50
   steeringSmoothing: 10
   maxSteeringAngle: 30
   speedBasedSteeringMultiplier: 0.5
+  forceReverseTime: 1
 --- !u!114 &7434589816437386487
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -804,6 +812,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e657509d952e6e4bb3d382ab44ca8bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  NewGameEvent: {fileID: 11400000, guid: 23ed26e5fdc8a6a45b08ae3e084d9ddf, type: 2}
   HP: 100
   MaxHP: 100
   Armor: 100
@@ -818,6 +827,21 @@ MonoBehaviour:
   OnTakeDamage:
     m_PersistentCalls:
       m_Calls: []
+  OnDie:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1365630481296061693}
+        m_TargetAssemblyTypeName: Chase, Assembly-CSharp
+        m_MethodName: ChaseDie
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   OnGasRecovery:
     m_PersistentCalls:
       m_Calls: []

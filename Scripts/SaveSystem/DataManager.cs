@@ -20,10 +20,7 @@ public class DataManager : MonoBehaviour
 
     private void Awake()
     {
-        if (instance == null)
-            instance = this;
-        else
-            Destroy(this.gameObject);
+        instance = this;
 
         saveData = new Data();
 
@@ -34,23 +31,19 @@ public class DataManager : MonoBehaviour
 
     private void OnEnable()
     {
-        if (saveDataEvent != null)
-            saveDataEvent.OnEventRaised += Save;
-        if (loadDataEvent != null)
-            loadDataEvent.OnEventRaised += Load;
+        saveDataEvent.OnEventRaised += Save;
+        loadDataEvent.OnEventRaised += Load;
     }
 
     private void OnDisable()
     {
-        if (saveDataEvent != null)
-            saveDataEvent.OnEventRaised -= Save;
-        if (loadDataEvent != null)
-            loadDataEvent.OnEventRaised -= Load;
+        saveDataEvent.OnEventRaised -= Save;
+        loadDataEvent.OnEventRaised -= Load;
     }
 
     private void Update()
     {
-        if (Keyboard.current != null && Keyboard.current.lKey.wasPressedThisFrame)
+        if (Keyboard.current.lKey.wasPressedThisFrame)
         {
             Load();
         }
@@ -111,15 +104,8 @@ public class DataManager : MonoBehaviour
             // 使用 Unity 的 JsonUtility 反序列化
             saveData = JsonUtility.FromJson<Data>(stringData);
             
-            if (saveData == null)
-            {
-                saveData = new Data();
-            }
-            else
-            {
-                // 从列表重建字典
-                saveData.InitializeDictionariesFromLists();
-            }
+            // 从列表重建字典
+            saveData.InitializeDictionariesFromLists();
         }
     }
 }

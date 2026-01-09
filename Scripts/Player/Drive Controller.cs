@@ -9,9 +9,11 @@ public class DriveController : MonoBehaviour
     public VoidEventSO afterSceneLoadedEvent;
     public VoidEventSO LoadDataEvent;
     public VoidEventSO backToMenuEvent;
+    public VoidEventSO TimeoutEvent;
     public ResourceEventSO GasEvent;
     public ResourceEventSO HPEvent;
-
+    [Header("EventRaise")]
+    public VoidEventSO SaveDataEvent;
     [Header("Attributes")]
     private Character character;
     
@@ -23,12 +25,14 @@ public class DriveController : MonoBehaviour
     
     [Header("Physics")]
     private Drive drive;
-    
-    
-
     private Rigidbody rb;
     private float horizontalInput;
     private float forwardInput;
+    public bool isDead = false;
+
+
+
+
     private void OnEnable()
     {
         sceneloadEvent.LoadRequestEvent += OnloadEvent;
@@ -37,6 +41,7 @@ public class DriveController : MonoBehaviour
         backToMenuEvent.OnEventRaised += OnloadDataEvent;
         GasEvent.OnEventRaised += OnGasEvent;
         HPEvent.OnEventRaised += OnHPEvent;
+        TimeoutEvent.OnEventRaised += OnTimeoutEvent;
     }
     private void OnDisable()
     {
@@ -46,18 +51,19 @@ public class DriveController : MonoBehaviour
         backToMenuEvent.OnEventRaised -= OnloadDataEvent;
         GasEvent.OnEventRaised -= OnGasEvent;
         HPEvent.OnEventRaised -= OnHPEvent;
+        TimeoutEvent.OnEventRaised -= OnTimeoutEvent;
     }
-    void Start()
+    private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         character = GetComponent<Character>();
         drive = GetComponent<Drive>();
         inputControl = GetComponent<PlayerInput>();
-
     }
 
 
-    void FixedUpdate()
+
+    private void FixedUpdate()
     {
         if(character.Gas > 0)
         {
@@ -125,9 +131,26 @@ public class DriveController : MonoBehaviour
     private void OnAfterSceneLoadedEvent()
     {
         inputControl.actions.FindActionMap("Drive")?.Enable();
+        SaveDataEvent.RaiseEvent();
     }
     private void OnloadDataEvent()
     {
+        isDead = false;
         inputControl.actions.FindActionMap("Drive")?.Enable();
+    }
+    public void PlayerDeath()
+    {
+        inputControl.actions.FindActionMap("Drive")?.Disable();
+        isDead = true;
+        gasInput = 0;
+        brakeInput = 0;
+        steeringInput = Vector2.zero; 
+    }
+    private void OnTimeoutEvent()
+    {
+        inputControl.actions.FindActionMap("Drive")?.Disable();
+        gasInput = 0;
+        brakeInput = 0;
+        steeringInput = Vector2.zero;
     }
 }

@@ -2,7 +2,8 @@ using UnityEngine;
 using UnityEngine.Events;
 public class Character : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    [Header("EventListeners")]
+    public VoidEventSO NewGameEvent;
    [Header("Attributes")]
     public float HP = 100;
     public float MaxHP = 100;
@@ -17,9 +18,19 @@ public class Character : MonoBehaviour
     public UnityEvent<Character> OnHealthChange;
 
     public UnityEvent OnTakeDamage;
+    public UnityEvent OnDie;
 
     public UnityEvent<Character> OnGasRecovery;
 
+    
+    private void OnEnable()
+    {
+        NewGameEvent.OnEventRaised += OnNewGameEvent;
+    }
+    private void OnDisable()
+    {
+        NewGameEvent.OnEventRaised -= OnNewGameEvent;
+    }
     private void Start()
     {
         HP = MaxHP;
@@ -31,7 +42,13 @@ public class Character : MonoBehaviour
     {
         if(GasConsumptionEnabled)
         {
+           
             Gas -= GasConsumption * Time.deltaTime;
+            if(Gas == 0)
+            {
+                OnDie.Invoke();
+                Debug.Log("Gas is 0");
+            }
         }
     }
     public void TakeDamage(float damage)
@@ -43,7 +60,8 @@ public class Character : MonoBehaviour
         else
         {
             HP = 0;
-            Destroy(gameObject);
+            OnDie.Invoke();
+            Debug.Log("HP is 0");
         }
         OnHealthChange.Invoke(this);
     }
@@ -69,6 +87,13 @@ public class Character : MonoBehaviour
         {
             HP += amount;
         }
+        OnHealthChange.Invoke(this);
+    }
+    private void OnNewGameEvent()
+    {
+        HP = MaxHP;
+        Armor = MaxArmor;
+        Gas = MaxGas;
         OnHealthChange.Invoke(this);
     }
 }

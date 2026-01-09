@@ -22,6 +22,7 @@ public class SceneLoader : MonoBehaviour, ISaveable
     public VoidEventSO afterSceneLoadedEvent;
     public FadeEventSO fadeEvent;
     public SceneLoadEventSO unloadedSceneEvent;
+ 
 
     [Header("Scene")]
     public GameSceneSO firstLoadScene;
@@ -43,20 +44,14 @@ public class SceneLoader : MonoBehaviour, ISaveable
     //TODO:做完MainMenu之后更改
     private void Start()
     {
-        if (loadEventSO != null && menuScene != null)
-        {
-            loadEventSO.RaiseLoadRequestEvent(menuScene, menuPosition, true);
-        }
+        loadEventSO.RaiseLoadRequestEvent(menuScene, menuPosition, true);
         // NewGame();
     }
 
     private void OnEnable()
     {
-        if (loadEventSO != null)
             loadEventSO.LoadRequestEvent += OnLoadRequestEvent;
-        if (newGameEvent != null)
             newGameEvent.OnEventRaised += NewGame;
-        if (backToMenuEvent != null)
             backToMenuEvent.OnEventRaised += OnBackToMenuEvent;
 
         ISaveable saveable = this;
@@ -65,11 +60,8 @@ public class SceneLoader : MonoBehaviour, ISaveable
 
     private void OnDisable()
     {
-        if (loadEventSO != null)
             loadEventSO.LoadRequestEvent -= OnLoadRequestEvent;
-        if (newGameEvent != null)
             newGameEvent.OnEventRaised -= NewGame;
-        if (backToMenuEvent != null)
             backToMenuEvent.OnEventRaised -= OnBackToMenuEvent;
 
         ISaveable saveable = this;
@@ -79,16 +71,14 @@ public class SceneLoader : MonoBehaviour, ISaveable
     private void OnBackToMenuEvent()
     {
         sceneToLoad = menuScene;
-        if (loadEventSO != null)
-            loadEventSO.RaiseLoadRequestEvent(sceneToLoad, menuPosition, true);
+        loadEventSO.RaiseLoadRequestEvent(sceneToLoad, menuPosition, true);
     }
 
     private void NewGame()
     {
         sceneToLoad = firstLoadScene;
         // OnLoadRequestEvent(sceneToLoad, firstPosition, true);
-        if (loadEventSO != null)
-            loadEventSO.RaiseLoadRequestEvent(sceneToLoad, firstPosition, true);
+        loadEventSO.RaiseLoadRequestEvent(sceneToLoad, firstPosition, true);
     }
 
     /// <summary>
@@ -106,19 +96,12 @@ public class SceneLoader : MonoBehaviour, ISaveable
         sceneToLoad = locationToLoad;
         positionToGo = posToGo;
         this.fadeScreen = fadeScreen;
-        if (currentLoadedScene != null)
-        {
-            StartCoroutine(UnLoadPreviousScene());
-        }
-        else
-        {
-            LoadNewScene();
-        }
+        StartCoroutine(UnLoadPreviousScene());
     }
 
     private IEnumerator UnLoadPreviousScene()
     {
-        if (fadeScreen && fadeEvent != null)
+        if (fadeScreen)
         {
             //TODO:变黑
             fadeEvent.FadeIn(fadeDuration);
@@ -127,13 +110,17 @@ public class SceneLoader : MonoBehaviour, ISaveable
         yield return new WaitForSeconds(fadeDuration);
 
         //广播事件调整血条显示
-        if (unloadedSceneEvent != null)
-            unloadedSceneEvent.RaiseLoadRequestEvent(sceneToLoad, positionToGo, true);
+        unloadedSceneEvent.RaiseLoadRequestEvent(sceneToLoad, positionToGo, true);
 
-        yield return currentLoadedScene.sceneReference.UnLoadScene();
+        // 检查是否有已加载的场景需要卸载
+        if (currentLoadedScene != null && currentLoadedScene.sceneReference != null)
+        {
+            yield return currentLoadedScene.sceneReference.UnLoadScene();
+            Debug.Log("UnLoaded Previous Scene");
+        }
+        
         //关闭人物
-        if (playerTrans != null)
-            playerTrans.gameObject.SetActive(false);
+        playerTrans.gameObject.SetActive(false);
 
         //加载新场景
         LoadNewScene();
@@ -142,6 +129,7 @@ public class SceneLoader : MonoBehaviour, ISaveable
     private void LoadNewScene()
     {
         var loadingOption = sceneToLoad.sceneReference.LoadSceneAsync(LoadSceneMode.Additive, true);
+        Debug.Log("Loading New Scene");
         loadingOption.Completed += OnLoadCompleted;
     }
 
@@ -153,13 +141,10 @@ public class SceneLoader : MonoBehaviour, ISaveable
     {
         currentLoadedScene = sceneToLoad;
 
-        if (playerTrans != null)
-        {
-            playerTrans.position = positionToGo;
-            playerTrans.gameObject.SetActive(true);
-        }
+        playerTrans.position = positionToGo;
+        playerTrans.gameObject.SetActive(true);
 
-        if (fadeScreen && fadeEvent != null)
+        if (fadeScreen)
         {
             //TODO:
             fadeEvent.FadeOut(fadeDuration);
@@ -167,7 +152,7 @@ public class SceneLoader : MonoBehaviour, ISaveable
 
         isLoading = false;
 
-        if (currentLoadedScene.sceneType == SceneType.Loaction && afterSceneLoadedEvent != null)
+        if (currentLoadedScene.sceneType == SceneType.Loaction)
             //场景加载完成后事件
             afterSceneLoadedEvent.RaiseEvent();
     }
@@ -179,22 +164,18 @@ public class SceneLoader : MonoBehaviour, ISaveable
 
     public void GetSaveData(Data data)
     {
-        if (currentLoadedScene != null)
-            data.SaveGameScene(currentLoadedScene);
+        data.SaveGameScene(currentLoadedScene);
     }
 
     public void LoadSaveData(Data data)
     {
-        if (playerTrans != null)
+        var playerID = playerTrans.GetComponent<DataDefination>();
+        if (data.characterPosDict.ContainsKey(playerID.ID))
         {
-            var playerID = playerTrans.GetComponent<DataDefination>();
-            if (playerID != null && data.characterPosDict.ContainsKey(playerID.ID))
-            {
-                positionToGo = data.characterPosDict[playerID.ID].ToVector3();
-                sceneToLoad = data.GetSavedScene();
+            positionToGo = data.characterPosDict[playerID.ID].ToVector3();
+            sceneToLoad = data.GetSavedScene();
 
-                OnLoadRequestEvent(sceneToLoad, positionToGo, true);
-            }
+            OnLoadRequestEvent(sceneToLoad, positionToGo, true);
         }
     }
 }

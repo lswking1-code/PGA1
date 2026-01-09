@@ -12,12 +12,23 @@ public class Chase : MonoBehaviour
     [Range(0, 100)]
     public float brakeSpeed = 15f;
     
+    [Header("EventListeners")]
+    public VoidEventSO TimeoutEvent;
+    public VoidEventSO GameOverEvent;
     [Header("Wall Detection Settings")]
     [Range(0, 50)]
     public float wallDetectionDistance = 10f; // 射线检测距离
     public bool isWall = false;
     public float wallDistance = 10f; // 与Wall的距离
-    public float reverseWallDistance = 10;  
+    public float reverseWallDistance = 10;
+    [Range(0, 5)]
+    public float reverseSpeedThreshold = 1f; // 速度阈值，低于此值可以倒车
+    
+    [Header("Ray Position Offsets")]
+    public Vector3 ray1Offset1 = Vector3.zero;
+    public Vector3 ray1Offset2 = Vector3.zero;
+    public Vector3 ray2Offset1 = Vector3.zero;
+    public Vector3 ray2Offset2 = Vector3.zero;  
     
     [Header("Distance Settings")]
     [Range(0, 100)]
@@ -35,7 +46,20 @@ public class Chase : MonoBehaviour
     public float speedBasedSteeringMultiplier = 0.5f; // 速度对转向的影响
     
     private float currentTurnAmount = 0f; // 当前转向值（用于平滑）
-    
+    private bool isReversing = false; // 是否正在倒车状态
+    private float reversingStartTime = 0f; // 开始倒车的时间
+    [Range(0, 5)]
+    public float forceReverseTime = 1f; // 强制倒车的等待时间
+    private void OnEnable()
+    {
+        TimeoutEvent.OnEventRaised += OnTimeoutEvent;
+        GameOverEvent.OnEventRaised += OnGameOverEvent;
+    }
+    private void OnDisable()
+    {
+        TimeoutEvent.OnEventRaised -= OnTimeoutEvent;
+        GameOverEvent.OnEventRaised -= OnGameOverEvent;
+    }
     private void Start()
     {
         drive = GetComponent<Drive>();
@@ -104,31 +128,65 @@ public class Chase : MonoBehaviour
 
         float distanceToTarget = Vector3.Distance(transform.position, navigationTarget);
         
-        if(distanceToTarget > reachedTargetDistance)
+        // 优先检查倒车逻辑（无论车辆朝向如何，无论距离如何）
+        // 如果检测到墙，开始倒车状态
+        if(isWall)//TODO：如果两面都是墙，依然会卡死
         {
-            Vector3 dirToMovePosition = (navigationTarget - transform.position).normalized;
-            float dot = Vector3.Dot(transform.forward, dirToMovePosition);
-
-            if(dot > 0)//前进判断
+            if(!isReversing)
             {
-                forwardAmount = 1;
-                brakeAmount = 0;
-                //靠近时减速
-                if(distanceToTarget < stoppingDistance && currentSpeed > stoppingSpeed)
-                {
-                    forwardAmount = 0;
-                    brakeAmount = 1;
-                }
+                // 刚开始倒车状态，记录时间
+                isReversing = true;
+                reversingStartTime = Time.time;
+            }
+        }
+        
+        // 如果正在倒车状态，持续倒车直到距离足够远
+        if(isReversing)
+        {
+            if(wallDistance > reverseWallDistance)
+            {
+                // 距离足够远，结束倒车状态
+                isReversing = false; 
+                reversingStartTime = 0f;
             }
             else
             {
-                if(distanceToTarget > reverseDistance)//TODO:优化倒车逻辑
+                // 检查是否应该强制倒车（距离很近且等待时间足够）
+                bool shouldForceReverse = wallDistance < 2f && (Time.time - reversingStartTime) > forceReverseTime;
+                
+                // 继续倒车：先刹车直到速度降到阈值以下，然后倒车
+                if(currentSpeed > reverseSpeedThreshold && !shouldForceReverse)
                 {
-                    if(!isWall && wallDistance > reverseWallDistance)
-                    {
-                        forwardAmount = 1;
-                    }
-                    else
+                    // 速度还太高，先刹车（除非需要强制倒车）
+                    forwardAmount = 0;
+                    brakeAmount = 1;
+                    targetTurnAmount = 0;
+                }
+                else
+                {
+                    // 速度足够低或需要强制倒车，可以倒车
+                    forwardAmount = 0;
+                    brakeAmount = 1; // Drive类会在速度<=0时自动转换为倒车
+                    targetTurnAmount = 0; // 倒车时不转向
+                }
+            }
+        }
+        
+        // 如果不在倒车状态，执行正常的追逐逻辑
+        if(!isReversing)
+        {
+            if(distanceToTarget > reachedTargetDistance)
+            {
+                Vector3 dirToMovePosition = (navigationTarget - transform.position).normalized;
+                float dot = Vector3.Dot(transform.forward, dirToMovePosition);
+
+                // 正常判断前进或倒车
+                if(dot > 0)//前进判断
+                {
+                    forwardAmount = 1;
+                    brakeAmount = 0;
+                    //靠近时减速
+                    if(distanceToTarget < stoppingDistance && currentSpeed > stoppingSpeed)
                     {
                         forwardAmount = 0;
                         brakeAmount = 1;
@@ -136,31 +194,40 @@ public class Chase : MonoBehaviour
                 }
                 else
                 {
-                    forwardAmount = 0;
-                    brakeAmount = 1;
+                    if(distanceToTarget > reverseDistance)//TODO:优化倒车逻辑
+                    {
+                        // 正常前进
+                        forwardAmount = 1;
+                        brakeAmount = 0;
+                    }
+                    else
+                    {
+                        forwardAmount = 0;
+                        brakeAmount = 1;
+                    }
                 }
-            }
 
-            float angleToDir = Vector3.SignedAngle(transform.forward, dirToMovePosition, Vector3.up);
-            
-            // 根据角度计算转向强度（-1 到 1），而不是直接设为 1 或 -1
-            // 角度越大，转向强度越大，但最大不超过 1
-            float normalizedAngle = Mathf.Clamp(angleToDir / maxSteeringAngle, -1f, 1f);//AI
-            targetTurnAmount = normalizedAngle;//AI
-            
-        }
-        else
-        {
-            if(currentSpeed > brakeSpeed)//减速判断
-            {
-                brakeAmount = 1;
+                float angleToDir = Vector3.SignedAngle(transform.forward, dirToMovePosition, Vector3.up);
+                
+                // 根据角度计算转向强度（-1 到 1），而不是直接设为 1 或 -1
+                // 角度越大，转向强度越大，但最大不超过 1
+                float normalizedAngle = Mathf.Clamp(angleToDir / maxSteeringAngle, -1f, 1f);//AI
+                targetTurnAmount = normalizedAngle;//AI
+                
             }
             else
             {
-                forwardAmount = 0;//减速到15f以下时，停止前进并刹车
-                brakeAmount = 0;
+                if(currentSpeed > brakeSpeed)//减速判断
+                {
+                    brakeAmount = 1;
+                }
+                else
+                {
+                    forwardAmount = 0;//减速到15f以下时，停止前进并刹车
+                    brakeAmount = 0;
+                }
+                targetTurnAmount = 0;//减速到15f以下时，停止转向并刹车
             }
-            targetTurnAmount = 0;//减速到15f以下时，停止转向并刹车
         }
         
         // 平滑转向值，避免突然变化（使用基于时间的插值）
@@ -201,7 +268,6 @@ public class Chase : MonoBehaviour
         }
     }
     
-    //TODO:优化Nav逻辑 BUG原因：敌人遇到障碍物并且玩家距离过远时，敌人会卡在障碍物上
     // 将位置投影到最近的 NavMesh 位置
     private void SnapToNavMesh()
     {
@@ -217,56 +283,129 @@ public class Chase : MonoBehaviour
     
     /// <summary>
     /// 检测车辆前方是否有Tag为"Wall"的物体，并返回距离
-    /// 使用两根射线：一根用于检测Wall（isWall），一根用于获取距离（wallDistance）
+    /// 使用两组射线，每组两根：第一组用于检测Wall（isWall），第二组用于获取距离（wallDistance）
     /// </summary>
     private void CheckForWall()
     {
-        Vector3 rayOrigin = transform.position;
+        Vector3 basePosition = transform.position;
         Vector3 rayDirection = transform.forward;
         
-        // 第一根射线：用于检测Wall并设置isWall
-        RaycastHit hitForWall;
-        if (Physics.Raycast(rayOrigin, rayDirection, out hitForWall, wallDetectionDistance))
+        // 计算第一组两根射线的起点（应用位置偏移）
+        Vector3 ray1Origin1 = basePosition + transform.TransformDirection(ray1Offset1);
+        Vector3 ray1Origin2 = basePosition + transform.TransformDirection(ray1Offset2);
+        
+        // 第一组射线：用于检测Wall并设置isWall（如果任意一根检测到，isWall = true）
+        bool wallDetected1 = false;
+        bool wallDetected2 = false;
+        
+        RaycastHit hitForWall1;
+        if (Physics.Raycast(ray1Origin1, rayDirection, out hitForWall1, wallDetectionDistance))
         {
-            if (hitForWall.collider.CompareTag("Wall"))
+            if (hitForWall1.collider.CompareTag("Wall"))
             {
-                isWall = true;
-                Debug.DrawRay(rayOrigin, rayDirection * hitForWall.distance, Color.red);
+                wallDetected1 = true;
+                Debug.DrawRay(ray1Origin1, rayDirection * hitForWall1.distance, Color.red);
             }
             else
             {
-                isWall = false;
-                Debug.DrawRay(rayOrigin, rayDirection * hitForWall.distance, Color.yellow);
+                Debug.DrawRay(ray1Origin1, rayDirection * hitForWall1.distance, Color.yellow);
             }
         }
         else
         {
-            isWall = false;
-            Debug.DrawRay(rayOrigin, rayDirection * wallDetectionDistance, Color.green);
+            Debug.DrawRay(ray1Origin1, rayDirection * wallDetectionDistance, Color.green);
         }
         
-        // 第二根射线：专门用于检测Wall并获取距离（wallDistance）
-        RaycastHit hitForDistance;
-        // 使用更长的检测距离以确保能检测到Wall
-        float maxDistance = Mathf.Max(wallDetectionDistance, reverseWallDistance + 1);
-        if (Physics.Raycast(rayOrigin, rayDirection, out hitForDistance, maxDistance))
+        RaycastHit hitForWall2;
+        if (Physics.Raycast(ray1Origin2, rayDirection, out hitForWall2, wallDetectionDistance))
         {
-            if (hitForDistance.collider.CompareTag("Wall"))
+            if (hitForWall2.collider.CompareTag("Wall"))
             {
-                wallDistance = hitForDistance.distance; // 存储与Wall的距离
-                Debug.DrawRay(rayOrigin + Vector3.up * 0.1f, rayDirection * hitForDistance.distance, Color.blue);
+                wallDetected2 = true;
+                Debug.DrawRay(ray1Origin2, rayDirection * hitForWall2.distance, Color.red);
             }
             else
             {
-                wallDistance = reverseWallDistance + 1; // 未检测到Wall，设为倒车距离+1
-                Debug.DrawRay(rayOrigin + Vector3.up * 0.1f, rayDirection * hitForDistance.distance, Color.cyan);
+                Debug.DrawRay(ray1Origin2, rayDirection * hitForWall2.distance, Color.yellow);
             }
         }
         else
         {
-            wallDistance = reverseWallDistance + 1; // 未检测到任何物体，设为倒车距离+1
-            Debug.DrawRay(rayOrigin + Vector3.up * 0.1f, rayDirection * maxDistance, Color.white);
+            Debug.DrawRay(ray1Origin2, rayDirection * wallDetectionDistance, Color.green);
+        }
+        
+        // 如果任意一根检测到Wall，设置isWall为true
+        isWall = wallDetected1 || wallDetected2;
+        
+        // 第二组射线：专门用于检测Wall并获取距离（wallDistance）
+        // 计算第二组两根射线的起点（应用位置偏移）
+        Vector3 ray2Origin1 = basePosition + transform.TransformDirection(ray2Offset1);
+        Vector3 ray2Origin2 = basePosition + transform.TransformDirection(ray2Offset2);
+        
+        // 使用更长的检测距离以确保能检测到Wall
+        float maxDistance = Mathf.Max(wallDetectionDistance, reverseWallDistance + 1);
+        
+        float minDistance = float.MaxValue;
+        bool foundWall = false;
+        
+        RaycastHit hitForDistance1;
+        if (Physics.Raycast(ray2Origin1, rayDirection, out hitForDistance1, maxDistance))
+        {
+            if (hitForDistance1.collider.CompareTag("Wall"))
+            {
+                minDistance = Mathf.Min(minDistance, hitForDistance1.distance);
+                foundWall = true;
+                Debug.DrawRay(ray2Origin1, rayDirection * hitForDistance1.distance, Color.blue);
+            }
+            else
+            {
+                Debug.DrawRay(ray2Origin1, rayDirection * hitForDistance1.distance, Color.cyan);
+            }
+        }
+        else
+        {
+            Debug.DrawRay(ray2Origin1, rayDirection * maxDistance, Color.white);
+        }
+        
+        RaycastHit hitForDistance2;
+        if (Physics.Raycast(ray2Origin2, rayDirection, out hitForDistance2, maxDistance))
+        {
+            if (hitForDistance2.collider.CompareTag("Wall"))
+            {
+                minDistance = Mathf.Min(minDistance, hitForDistance2.distance);
+                foundWall = true;
+                Debug.DrawRay(ray2Origin2, rayDirection * hitForDistance2.distance, Color.blue);
+            }
+            else
+            {
+                Debug.DrawRay(ray2Origin2, rayDirection * hitForDistance2.distance, Color.cyan);
+            }
+        }
+        else
+        {
+            Debug.DrawRay(ray2Origin2, rayDirection * maxDistance, Color.white);
+        }
+        
+        // 设置wallDistance：如果检测到Wall，使用最近距离；否则设为倒车距离+1
+        if (foundWall)
+        {
+            wallDistance = minDistance;
+        }
+        else
+        {
+            wallDistance = reverseWallDistance + 1;
         }
     }
-
+    private void OnTimeoutEvent()
+    {
+        //agent.enabled = false;
+    }
+    private void OnGameOverEvent()
+    {
+        //agent.enabled = false;
+    }
+    public void ChaseDie()
+    {
+        Destroy(gameObject);
+    }
 }
