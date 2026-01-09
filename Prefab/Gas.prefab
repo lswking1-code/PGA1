@@ -198,8 +198,8 @@ MonoBehaviour:
   ScannerPrefab: {fileID: 945508254599679685, guid: 82cf5bea7a3bd8f40b41c82a9baa250d, type: 3}
   duration: 2
   size: 40
-  Gas: 30
-  GasEvent: {fileID: 11400000, guid: 145cf2cfc5106ce46bbb62cf2ad37b49, type: 2}
+  amount: 30
+  ResourceEvent: {fileID: 11400000, guid: 145cf2cfc5106ce46bbb62cf2ad37b49, type: 2}
 --- !u!1 &6670869516064402714
 GameObject:
   m_ObjectHideFlags: 0

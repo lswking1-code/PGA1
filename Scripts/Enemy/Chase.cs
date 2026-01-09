@@ -12,6 +12,13 @@ public class Chase : MonoBehaviour
     [Range(0, 100)]
     public float brakeSpeed = 15f;
     
+    [Header("Wall Detection Settings")]
+    [Range(0, 50)]
+    public float wallDetectionDistance = 10f; // 射线检测距离
+    public bool isWall = false;
+    public float wallDistance = 10f; // 与Wall的距离
+    public float reverseWallDistance = 10;  
+    
     [Header("Distance Settings")]
     [Range(0, 100)]
     public float reverseDistance = 25;
@@ -53,6 +60,7 @@ public class Chase : MonoBehaviour
 
     private void FixedUpdate()
     {
+        CheckForWall();
         ChaseAI();
     }
     public void SetTargetPosition(Vector3 targetPosition)
@@ -114,9 +122,17 @@ public class Chase : MonoBehaviour
             }
             else
             {
-                if(distanceToTarget > reverseDistance)
+                if(distanceToTarget > reverseDistance)//TODO:优化倒车逻辑
                 {
-                    forwardAmount = 1;
+                    if(!isWall && wallDistance > reverseWallDistance)
+                    {
+                        forwardAmount = 1;
+                    }
+                    else
+                    {
+                        forwardAmount = 0;
+                        brakeAmount = 1;
+                    }
                 }
                 else
                 {
@@ -174,13 +190,6 @@ public class Chase : MonoBehaviour
                         targetTransform = obj.transform;
                         return;
                     }
-                    // 递归查找子对象
-                    Transform found = FindInChildren(obj.transform, "Player");
-                    if (found != null)
-                    {
-                        targetTransform = found;
-                        return;
-                    }
                 }
             }
         }
@@ -190,26 +199,6 @@ public class Chase : MonoBehaviour
         {
             Debug.LogWarning("Chase: Tag Player not found in any loaded scene");
         }
-    }
-    
-    /// <summary>
-    /// 在子对象中递归查找指定Tag的对象
-    /// </summary>
-    private Transform FindInChildren(Transform parent, string tag)//AI
-    {
-        foreach (Transform child in parent)
-        {
-            if (child.CompareTag(tag))
-            {
-                return child;
-            }
-            Transform found = FindInChildren(child, tag);
-            if (found != null)
-            {
-                return found;
-            }
-        }
-        return null;
     }
     
     //TODO:优化Nav逻辑 BUG原因：敌人遇到障碍物并且玩家距离过远时，敌人会卡在障碍物上
@@ -223,6 +212,60 @@ public class Chase : MonoBehaviour
             {
                 agent.nextPosition = hit.position;
             }
+        }
+    }
+    
+    /// <summary>
+    /// 检测车辆前方是否有Tag为"Wall"的物体，并返回距离
+    /// 使用两根射线：一根用于检测Wall（isWall），一根用于获取距离（wallDistance）
+    /// </summary>
+    private void CheckForWall()
+    {
+        Vector3 rayOrigin = transform.position;
+        Vector3 rayDirection = transform.forward;
+        
+        // 第一根射线：用于检测Wall并设置isWall
+        RaycastHit hitForWall;
+        if (Physics.Raycast(rayOrigin, rayDirection, out hitForWall, wallDetectionDistance))
+        {
+            if (hitForWall.collider.CompareTag("Wall"))
+            {
+                isWall = true;
+                Debug.DrawRay(rayOrigin, rayDirection * hitForWall.distance, Color.red);
+            }
+            else
+            {
+                isWall = false;
+                Debug.DrawRay(rayOrigin, rayDirection * hitForWall.distance, Color.yellow);
+            }
+        }
+        else
+        {
+            isWall = false;
+            Debug.DrawRay(rayOrigin, rayDirection * wallDetectionDistance, Color.green);
+        }
+        
+        // 第二根射线：专门用于检测Wall并获取距离（wallDistance）
+        RaycastHit hitForDistance;
+        // 使用更长的检测距离以确保能检测到Wall
+        float maxDistance = Mathf.Max(wallDetectionDistance, reverseWallDistance + 1);
+        if (Physics.Raycast(rayOrigin, rayDirection, out hitForDistance, maxDistance))
+        {
+            if (hitForDistance.collider.CompareTag("Wall"))
+            {
+                wallDistance = hitForDistance.distance; // 存储与Wall的距离
+                Debug.DrawRay(rayOrigin + Vector3.up * 0.1f, rayDirection * hitForDistance.distance, Color.blue);
+            }
+            else
+            {
+                wallDistance = reverseWallDistance + 1; // 未检测到Wall，设为倒车距离+1
+                Debug.DrawRay(rayOrigin + Vector3.up * 0.1f, rayDirection * hitForDistance.distance, Color.cyan);
+            }
+        }
+        else
+        {
+            wallDistance = reverseWallDistance + 1; // 未检测到任何物体，设为倒车距离+1
+            Debug.DrawRay(rayOrigin + Vector3.up * 0.1f, rayDirection * maxDistance, Color.white);
         }
     }
 

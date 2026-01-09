@@ -19,6 +19,7 @@ public class DriveController : MonoBehaviour
     public float gasInput;
     public float brakeInput;
     public Vector2 steeringInput;
+    public PlayerInput inputControl;
     
     [Header("Physics")]
     private Drive drive;
@@ -51,6 +52,8 @@ public class DriveController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         character = GetComponent<Character>();
         drive = GetComponent<Drive>();
+        inputControl = GetComponent<PlayerInput>();
+
     }
 
 
@@ -117,14 +120,14 @@ public class DriveController : MonoBehaviour
     }
     private void OnloadEvent(GameSceneSO sceneToLoad, Vector3 posToGo, bool fadeScreen)
     {
-        
+        inputControl.actions.FindActionMap("Drive")?.Disable();
     }
     private void OnAfterSceneLoadedEvent()
     {
-        
+        inputControl.actions.FindActionMap("Drive")?.Enable();
     }
     private void OnloadDataEvent()
     {
-        
+        inputControl.actions.FindActionMap("Drive")?.Enable();
     }
 }
