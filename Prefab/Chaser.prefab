@@ -813,6 +813,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   NewGameEvent: {fileID: 11400000, guid: 23ed26e5fdc8a6a45b08ae3e084d9ddf, type: 2}
+  LoadDataEvent: {fileID: 11400000, guid: ca0ac8ddb2b9bba42bd64c75cf7c37dc, type: 2}
+  AfterSceneLoadedEvent: {fileID: 11400000, guid: fec1fb82551c8ce42bf2f5ba34102b46, type: 2}
   HP: 100
   MaxHP: 100
   Armor: 100

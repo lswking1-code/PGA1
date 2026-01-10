@@ -12,6 +12,8 @@ public class UIManager : MonoBehaviour
   public CharacterEventSO HealthEvent;
   public VoidEventSO GameOverEvent;
   public VoidEventSO TimeoutEvent;
+  public VoidEventSO afterSceneLoadedEvent;
+  public VoidEventSO GameClearEvent;
 
 
   [Header("UI")]
@@ -19,6 +21,7 @@ public class UIManager : MonoBehaviour
   public GameObject timerUI;
   public GameObject gameOverUI;
   public GameObject timeoutUI;
+  public GameObject gameclearUI;
 
 
 
@@ -30,6 +33,8 @@ public class UIManager : MonoBehaviour
     backToMenuEvent.OnEventRaised += OnloadDataEvent;
     TimeoutEvent.OnEventRaised += OnTimeoutEvent;
     GameOverEvent.OnEventRaised += OnGameOverEvent;
+    afterSceneLoadedEvent.OnEventRaised += OnAfterSceneLoadedEvent;
+    GameClearEvent.OnEventRaised += OnGameClearEvent;
   }
   private void OnDisable()
   {
@@ -39,6 +44,8 @@ public class UIManager : MonoBehaviour
     backToMenuEvent.OnEventRaised -= OnloadDataEvent;
     TimeoutEvent.OnEventRaised -= OnTimeoutEvent;
     GameOverEvent.OnEventRaised -= OnGameOverEvent;
+    afterSceneLoadedEvent.OnEventRaised -= OnAfterSceneLoadedEvent;
+    GameClearEvent.OnEventRaised -= OnGameClearEvent;
   }
   private void OnHealthEvent(Character character)
   {
@@ -57,6 +64,7 @@ public class UIManager : MonoBehaviour
   {
     timeoutUI.SetActive(false);
     gameOverUI.SetActive(false);
+    gameclearUI.SetActive(false);
     timer.ResetTimer();
   }
   private void OnTimeoutEvent()
@@ -66,5 +74,13 @@ public class UIManager : MonoBehaviour
   private void OnGameOverEvent()
   {
     gameOverUI.SetActive(true);
+  }
+  private void OnAfterSceneLoadedEvent()
+  {
+    timer.ResetTimer();
+  }
+  private void OnGameClearEvent()
+  {
+    gameclearUI.SetActive(true);
   }
 }

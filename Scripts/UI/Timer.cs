@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class Timer : MonoBehaviour
 {
@@ -11,19 +12,59 @@ public class Timer : MonoBehaviour
     public float MaxTimer = 360;
     public bool stopTimer = false;
     public TMP_Text timerText;
-
+    public GameSceneSO finalScene;
+    [Header("EventRaise")]
+    public VoidEventSO GameClearEvent;
     public VoidEventSO TimeoutEvent;
-    public void Start()
+    [Header("EventListeners")]
+    public SceneLoadEventSO unloadedSceneEvent;
+    private Coroutine timerCoroutine;
+    
+    private bool isFinalScene = false;
+    
+    private void OnEnable()
     {
-        timerSlider.maxValue = sliderTimer;
-        timerSlider.value = sliderTimer;
-        UpdateTimerText();
-        StartTimer();
+        unloadedSceneEvent.LoadRequestEvent += OnSceneLoadEvent;
     }
+    
+    private void OnDisable()
+    {
+        unloadedSceneEvent.LoadRequestEvent -= OnSceneLoadEvent;
+    }
+    
+    private void OnSceneLoadEvent(GameSceneSO sceneToLoad, Vector3 posToGo, bool fadeScreen)
+    {
+        CheckIfFinalScene(sceneToLoad);
+    }
+    
+    private void CheckIfFinalScene(GameSceneSO sceneToCheck)
+    {
+        if (finalScene == null || sceneToCheck == null)
+        {
+            isFinalScene = false;
+            return;
+        }
+        
+        // 直接比较GameSceneSO对象或名称
+        if (sceneToCheck == finalScene || sceneToCheck.name == finalScene.name)
+        {
+            isFinalScene = true;
+        }
+        else
+        {
+            isFinalScene = false;
+        }
+    }
+    
 
     public void StartTimer()
     {
-        StartCoroutine(StartTheTimerTicker());
+        if(timerCoroutine != null)
+        {
+            StopCoroutine(timerCoroutine);
+        }
+        stopTimer = false;
+        timerCoroutine = StartCoroutine(StartTheTimerTicker());
         //DO NOT ADD LOGIC HERE
     }
     
@@ -38,16 +79,24 @@ public class Timer : MonoBehaviour
             {
                 stopTimer = true;
             }
-            if(stopTimer == false)
+            if(!stopTimer)
             {
                 timerSlider.value = sliderTimer;
                 UpdateTimerText();
             }
         }
         //ADD YOUR GAME LOGIC HERE
-        if(stopTimer == true)
+        if(stopTimer)
         {   
-            TimeoutEvent.RaiseEvent();
+            if(isFinalScene)
+            {
+                GameClearEvent.RaiseEvent();
+            }
+            else
+            {
+                TimeoutEvent.RaiseEvent();
+            }
+            
         }
         //EG RESPAWN CHARACTER LOGIC
 
@@ -72,6 +121,7 @@ public class Timer : MonoBehaviour
         timerSlider.maxValue = MaxTimer;
         timerSlider.value = MaxTimer;
         UpdateTimerText();
+        StartTimer();
     }
    
 }

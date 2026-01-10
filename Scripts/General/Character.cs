@@ -4,6 +4,8 @@ public class Character : MonoBehaviour
 {
     [Header("EventListeners")]
     public VoidEventSO NewGameEvent;
+    public VoidEventSO LoadDataEvent;
+    public VoidEventSO AfterSceneLoadedEvent;
    [Header("Attributes")]
     public float HP = 100;
     public float MaxHP = 100;
@@ -26,10 +28,14 @@ public class Character : MonoBehaviour
     private void OnEnable()
     {
         NewGameEvent.OnEventRaised += OnNewGameEvent;
+        LoadDataEvent.OnEventRaised += OnLoadDataEvent;
+        AfterSceneLoadedEvent.OnEventRaised += OnAfterSceneLoadedEvent;
     }
     private void OnDisable()
     {
         NewGameEvent.OnEventRaised -= OnNewGameEvent;
+        LoadDataEvent.OnEventRaised -= OnLoadDataEvent; 
+        AfterSceneLoadedEvent.OnEventRaised -= OnAfterSceneLoadedEvent;
     }
     private void Start()
     {
@@ -90,6 +96,20 @@ public class Character : MonoBehaviour
         OnHealthChange.Invoke(this);
     }
     private void OnNewGameEvent()
+    {
+        HP = MaxHP;
+        Armor = MaxArmor;
+        Gas = MaxGas;
+        OnHealthChange.Invoke(this);
+    }
+    private void OnLoadDataEvent()
+    {
+        HP = MaxHP;
+        Armor = MaxArmor;
+        Gas = MaxGas;
+        OnHealthChange.Invoke(this);
+    }   
+    private void OnAfterSceneLoadedEvent()
     {
         HP = MaxHP;
         Armor = MaxArmor;

@@ -41,7 +41,6 @@ public class SceneLoader : MonoBehaviour, ISaveable
         // currentLoadedScene.sceneReference.LoadSceneAsync(LoadSceneMode.Additive);
     }
 
-    //TODO:做完MainMenu之后更改
     private void Start()
     {
         loadEventSO.RaiseLoadRequestEvent(menuScene, menuPosition, true);
@@ -81,12 +80,6 @@ public class SceneLoader : MonoBehaviour, ISaveable
         loadEventSO.RaiseLoadRequestEvent(sceneToLoad, firstPosition, true);
     }
 
-    /// <summary>
-    /// 场景加载事件请求
-    /// </summary>
-    /// <param name="locationToLoad"></param>
-    /// <param name="posToGo"></param>
-    /// <param name="fadeScreen"></param>
     private void OnLoadRequestEvent(GameSceneSO locationToLoad, Vector3 posToGo, bool fadeScreen)
     {
         if (isLoading)
@@ -103,7 +96,6 @@ public class SceneLoader : MonoBehaviour, ISaveable
     {
         if (fadeScreen)
         {
-            //TODO:变黑
             fadeEvent.FadeIn(fadeDuration);
         }
 
@@ -119,10 +111,9 @@ public class SceneLoader : MonoBehaviour, ISaveable
             Debug.Log("UnLoaded Previous Scene");
         }
         
-        //关闭人物
         playerTrans.gameObject.SetActive(false);
+        Debug.Log("Player is disabled");
 
-        //加载新场景
         LoadNewScene();
     }
 
@@ -142,7 +133,15 @@ public class SceneLoader : MonoBehaviour, ISaveable
         currentLoadedScene = sceneToLoad;
 
         playerTrans.position = positionToGo;
-        playerTrans.gameObject.SetActive(true);
+
+        if (currentLoadedScene.sceneType == SceneType.Loaction)
+        {
+            playerTrans.gameObject.SetActive(true);
+        }
+        else if (currentLoadedScene.sceneType == SceneType.Menu)
+        {
+            playerTrans.gameObject.SetActive(false);
+        }
 
         if (fadeScreen)
         {

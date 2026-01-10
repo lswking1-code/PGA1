@@ -45,6 +45,7 @@ public class DriveController : MonoBehaviour
     }
     private void OnDisable()
     {
+        inputControl.actions.FindActionMap("Drive")?.Disable();
         sceneloadEvent.LoadRequestEvent -= OnloadEvent;
         afterSceneLoadedEvent.OnEventRaised -= OnAfterSceneLoadedEvent;
         LoadDataEvent.OnEventRaised -= OnloadDataEvent;
