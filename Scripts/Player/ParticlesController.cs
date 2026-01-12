@@ -15,10 +15,6 @@ public class ParticlesController : MonoBehaviour
     [Tooltip("轮滑移阈值（侧向或前向）超过该值时触发粒子")]
     public float wheelSlipThreshold = 0.25f;
 
-    
-    [Tooltip("排气发射率范围（每秒）")]
-    public float exhaustRateMin = 1f;
-    public float exhaustRateMax = 20f;
 
     // runtime
     private InputProcessor inputProcessor;
@@ -43,8 +39,8 @@ public class ParticlesController : MonoBehaviour
             for (int i = 0; i < wheels.Length; i++)
             {
                 if (wheels[i] == null) { createdWheelParticles.Add(null); continue; }
-                var p = Instantiate(wheelParticlePrefab, wheels[i].transform.position, wheels[i].transform.rotation, wheels[i].transform);
-                createdWheelParticles.Add(p);
+                var pos = Instantiate(wheelParticlePrefab, wheels[i].transform.position, wheels[i].transform.rotation, wheels[i].transform);
+                createdWheelParticles.Add(pos);
             }
 
             wheelEmissions = new ParticleSystem.EmissionModule[createdWheelParticles.Count];
