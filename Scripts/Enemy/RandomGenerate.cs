@@ -12,21 +12,21 @@ public class RandomGenerate : MonoBehaviour
     public Transform[] generatePoints;
     
     [Header("Generation Settings")]
-    public float checkInterval = 60f; // 检测间隔（秒），默认60秒（1分钟）
-    public int minEnemyCount = 3; // 最小敌人数量
+    public float checkInterval = 60f; // Check interval (in seconds), default 60 seconds (1 minute)
+    public int minEnemyCount = 3; // Minimum enemy count
     
 
     private void OnEnable()
     {
-        AfterSceneLoadedEvent.OnEventRaised += OnAfterSceneLoadedEvent;
+        if (AfterSceneLoadedEvent != null) AfterSceneLoadedEvent.AddListener(OnAfterSceneLoadedEvent);
     }
     private void OnDisable()
     {
-        AfterSceneLoadedEvent.OnEventRaised -= OnAfterSceneLoadedEvent;
+        if (AfterSceneLoadedEvent != null) AfterSceneLoadedEvent.RemoveListener(OnAfterSceneLoadedEvent);
     }
     private void Start()
     {
-        // 启动协程，每分钟检测一次
+        // Start coroutine to check every minute
         StartCoroutine(CheckAndGenerateEnemies());
         FindPlayer();
     }
@@ -35,7 +35,7 @@ public class RandomGenerate : MonoBehaviour
         FindPlayer();
     }
     /// <summary>
-    /// 协程：每分钟检测场景中Tag为"Chaser"的物体数量，如果小于3则生成敌人
+    /// Coroutine: Check the number of objects with tag "Chaser" in the scene every minute, generate enemies if less than 3
     /// </summary>
     private IEnumerator CheckAndGenerateEnemies()
     {
@@ -43,37 +43,37 @@ public class RandomGenerate : MonoBehaviour
         {
             yield return new WaitForSeconds(checkInterval);
             
-            // 检测场景中Tag为"Chaser"的物体数量
+            // Check the number of objects with tag "Chaser" in the scene
             GameObject[] chasers = GameObject.FindGameObjectsWithTag("Chaser");
             int chaserCount = chasers.Length;
             
-            Debug.Log($"当前场景中Chaser数量: {chaserCount}");
+            Debug.Log($"Current Chaser count in scene: {chaserCount}");
             
-            // 如果数量小于3，则生成敌人
+            // If count is less than 3, generate enemies
             if (chaserCount < minEnemyCount)
             {
-                // 找到距离玩家最近的生成点
+                // Find the spawn point nearest to the player
                 Transform nearestPoint = FindNearestGeneratePoint();
                 
                 if (nearestPoint != null && enemyPrefabs != null)
                 {
-                    // 在最近的位置生成敌人
+                    // Spawn enemy at the nearest position
                     Instantiate(enemyPrefabs, nearestPoint.position, nearestPoint.rotation);
-                    Debug.Log($"在位置 {nearestPoint.position} 生成了新的敌人");
+                    Debug.Log($"Spawned new enemy at position {nearestPoint.position}");
                 }
                 else
                 {
                     if (nearestPoint == null)
-                        Debug.LogWarning("没有找到可用的生成点！");
+                        Debug.LogWarning("No available spawn point found!");
                     if (enemyPrefabs == null)
-                        Debug.LogWarning("敌人预制体未设置！");
+                        Debug.LogWarning("Enemy prefab is not set!");
                 }
             }
         }
     }
     
     /// <summary>
-    /// 找到距离玩家最近的生成点
+    /// Find the spawn point nearest to the player
     /// </summary>
     private Transform FindNearestGeneratePoint()
     {
@@ -83,7 +83,7 @@ public class RandomGenerate : MonoBehaviour
         Transform nearestPoint = generatePoints[0];
         float nearestDistance = Vector3.Distance(playerTransform.position, nearestPoint.position);
         
-        // 遍历所有生成点，找到距离玩家最近的一个
+        // Iterate through all spawn points to find the one nearest to the player
         for (int i = 1; i < generatePoints.Length; i++)
         {
             if (generatePoints[i] == null)
@@ -100,7 +100,7 @@ public class RandomGenerate : MonoBehaviour
         return nearestPoint;
     }
         /// <summary>
-    /// 查找Player对象（支持跨场景查找）
+    /// Find Player object (supports cross-scene lookup)
     /// </summary>
     private void FindPlayer()
     {
@@ -121,7 +121,7 @@ public class RandomGenerate : MonoBehaviour
             }
         }
         
-        // 如果还是没找到，输出警告
+        // If still not found, output warning
         if (playerTransform == null)
         {
             Debug.LogWarning("RandomGenerate: Tag Player not found in any loaded scene");
@@ -129,7 +129,7 @@ public class RandomGenerate : MonoBehaviour
     }
     private void OnAfterSceneLoadedEvent()
     {
-        // 清空所有生成的enemyPrefabs（Tag为"Chaser"的对象）
+        // Clear all spawned enemyPrefabs (objects with tag "Chaser")
         GameObject[] chasers = GameObject.FindGameObjectsWithTag("Chaser");
         foreach (GameObject chaser in chasers)
         {
@@ -139,6 +139,6 @@ public class RandomGenerate : MonoBehaviour
             }
         }
         
-        Debug.Log($"场景加载后清空了 {chasers.Length} 个敌人");
+        Debug.Log($"Cleared {chasers.Length} enemies after scene loaded");
     }
 }

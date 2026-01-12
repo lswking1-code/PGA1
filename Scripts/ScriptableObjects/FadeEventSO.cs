@@ -6,10 +6,18 @@ using UnityEngine.Events;
 [CreateAssetMenu(fileName = "FadeEventSO", menuName = "Scriptable Objects/FadeEventSO")]
 public class FadeEventSO : ScriptableObject
 {
-    public UnityAction<Color, float, bool> OnEventRaised;
+    [System.NonSerialized]
+    private UnityAction<Color, float, bool> onEventRaised;
+    
+    // Property for backward compatibility
+    public UnityAction<Color, float, bool> OnEventRaised
+    {
+        get { return onEventRaised; }
+        set { onEventRaised = value; }
+    }
     
     /// <summary>
-    /// 渐入变黑
+    /// Fade in to black
     /// </summary>
     /// <param name="duration"></param>
     public void FadeIn(float duration)
@@ -18,7 +26,7 @@ public class FadeEventSO : ScriptableObject
     }
     
     /// <summary>
-    /// 渐出变透明
+    /// Fade out to transparent
     /// </summary>
     /// <param name="duration"></param>
     public void FadeOut(float duration)
@@ -28,6 +36,18 @@ public class FadeEventSO : ScriptableObject
 
     public void RaiseEvent(Color target, float duration, bool fadeIn)
     {
-        OnEventRaised?.Invoke(target, duration, fadeIn);
+        onEventRaised?.Invoke(target, duration, fadeIn);
+    }
+    
+    // Add listener method
+    public void AddListener(UnityAction<Color, float, bool> listener)
+    {
+        onEventRaised += listener;
+    }
+    
+    // Remove listener method
+    public void RemoveListener(UnityAction<Color, float, bool> listener)
+    {
+        onEventRaised -= listener;
     }
 }

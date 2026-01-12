@@ -15,18 +15,18 @@ public class InputProcessor : MonoBehaviour
     public DriveInputs inputs = new DriveInputs();
 
     [Header("Source")]
-    public bool receiveFromLegacy = true;           // 使用旧输入轴（Vertical/Horizontal）
-    public bool receiveFromPlayerInput = false;     // 使用 Input System（优先）
-    public PlayerInput playerInput;                 // 可选，若使用 Input System 则赋值
+    public bool receiveFromLegacy = true;           // Use legacy input (Vertical/Horizontal)
+    public bool receiveFromPlayerInput = false;     // Use Input System (priority)
+    public PlayerInput playerInput;                 // Optional, assign when using Input System
 
     [Header("Input Action Names (PlayerInput)")]
     public string throttleAction = "Accelerate";    // float
     public string brakeAction = "Brake";            // float
-    public string steerAction = "Steer";            // Vector2 或 float（取 x）
+    public string steerAction = "Steer";            // Vector2 or float, takes x
 
     [Header("Smoothing")]
     public bool smoothInputs = true;
-    [Tooltip("变化速率（单位：/秒），值越大收敛越快")]
+    [Tooltip("Change rate (units/second), higher values are smoother")]
     public float smoothingFactor = 5f;
 
     private void Update()
@@ -37,7 +37,7 @@ public class InputProcessor : MonoBehaviour
         float targetBrake = 0f;
         float targetSteer = 0f;
 
-        // 优先 PlayerInput（如果启用并赋值）
+        // Read from PlayerInput, if not set, use legacy
         if (receiveFromPlayerInput && playerInput != null && playerInput.actions != null)
         {
             var a_throttle = playerInput.actions.FindAction(throttleAction);
@@ -79,7 +79,7 @@ public class InputProcessor : MonoBehaviour
     }
 
     /// <summary>
-    /// 覆写输入（外部可调用）。若 smoothInputs 为 true，将按 smoothingFactor 平滑过渡。
+    /// Override input (can be called externally), if smoothInputs is true, uses smoothingFactor for smoothing.
     /// </summary>
     public void OverrideInputs(DriveInputs newInputs)
     {

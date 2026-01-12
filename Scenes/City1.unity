@@ -2089,8 +2089,8 @@ MonoBehaviour:
   - {fileID: 1349376810}
   - {fileID: 998605444}
   - {fileID: 2049985541}
-  checkInterval: 15
-  minEnemyCount: 3
+  checkInterval: 10
+  minEnemyCount: 4
 --- !u!4 &1531457909
 Transform:
   m_ObjectHideFlags: 0
@@ -2608,6 +2608,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Gas
       objectReference: {fileID: 0}
+    - target: {fileID: 6670869516064402714, guid: bc2eb37ed2f85634d9470d254e380838, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2626,6 +2630,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1633802250}
     m_Modifications:
+    - target: {fileID: 237689825945261621, guid: f5d12f8dca8e7214f977697126380729, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 811164355808244814, guid: f5d12f8dca8e7214f977697126380729, type: 3}
       propertyPath: m_LocalPosition.x
       value: 724.7

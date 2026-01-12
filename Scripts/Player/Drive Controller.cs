@@ -36,23 +36,23 @@ public class DriveController : MonoBehaviour
     private void OnEnable()
     {
         sceneloadEvent.LoadRequestEvent += OnloadEvent;
-        afterSceneLoadedEvent.OnEventRaised += OnAfterSceneLoadedEvent;
-        LoadDataEvent.OnEventRaised += OnloadDataEvent;
-        backToMenuEvent.OnEventRaised += OnloadDataEvent;
+        if (afterSceneLoadedEvent != null) afterSceneLoadedEvent.AddListener(OnAfterSceneLoadedEvent);
+        if (LoadDataEvent != null) LoadDataEvent.AddListener(OnloadDataEvent);
+        if (backToMenuEvent != null) backToMenuEvent.AddListener(OnloadDataEvent);
         GasEvent.OnEventRaised += OnGasEvent;
         HPEvent.OnEventRaised += OnHPEvent;
-        TimeoutEvent.OnEventRaised += OnTimeoutEvent;
+        if (TimeoutEvent != null) TimeoutEvent.AddListener(OnTimeoutEvent);
     }
     private void OnDisable()
     {
         inputControl.actions.FindActionMap("Drive")?.Disable();
         sceneloadEvent.LoadRequestEvent -= OnloadEvent;
-        afterSceneLoadedEvent.OnEventRaised -= OnAfterSceneLoadedEvent;
-        LoadDataEvent.OnEventRaised -= OnloadDataEvent;
-        backToMenuEvent.OnEventRaised -= OnloadDataEvent;
+        if (afterSceneLoadedEvent != null) afterSceneLoadedEvent.RemoveListener(OnAfterSceneLoadedEvent);
+        if (LoadDataEvent != null) LoadDataEvent.RemoveListener(OnloadDataEvent);
+        if (backToMenuEvent != null) backToMenuEvent.RemoveListener(OnloadDataEvent);
         GasEvent.OnEventRaised -= OnGasEvent;
         HPEvent.OnEventRaised -= OnHPEvent;
-        TimeoutEvent.OnEventRaised -= OnTimeoutEvent;
+        if (TimeoutEvent != null) TimeoutEvent.RemoveListener(OnTimeoutEvent);
     }
     private void Awake()
     {

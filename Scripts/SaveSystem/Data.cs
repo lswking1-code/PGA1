@@ -7,12 +7,12 @@ public class Data
 {
     public string sceneToSave;
 
-    // 使用可序列化的列表来替代 Dictionary（JsonUtility 不支持 Dictionary）
+    // Use serializable lists to replace Dictionary (JsonUtility doesn't support Dictionary)
     public List<KeyValuePairStringVector3> characterPosList = new List<KeyValuePairStringVector3>();
     public List<KeyValuePairStringFloat> floatSavedList = new List<KeyValuePairStringFloat>();
     public List<KeyValuePairBoolBool> boolSavedList = new List<KeyValuePairBoolBool>();
 
-    // 临时字典用于运行时访问（不序列化）
+    // Temporary dictionaries for runtime access (not serialized)
     [System.NonSerialized]
     private Dictionary<string, SerializeVector3> _characterPosDict;
     [System.NonSerialized]
@@ -20,7 +20,7 @@ public class Data
     [System.NonSerialized]
     private Dictionary<bool, bool> _boolSavedData;
 
-    // 属性访问器，自动同步列表和字典
+    // Property accessors, automatically sync lists and dictionaries
     public Dictionary<string, SerializeVector3> characterPosDict
     {
         get
@@ -69,7 +69,7 @@ public class Data
         }
     }
 
-    // 从列表初始化字典（加载后调用）
+    // Initialize dictionaries from lists (called after loading)
     public void InitializeDictionariesFromLists()
     {
         _characterPosDict = new Dictionary<string, SerializeVector3>();
@@ -91,7 +91,7 @@ public class Data
         }
     }
 
-    // 同步字典到列表（保存前调用）
+    // Sync dictionaries to lists (called before saving)
     public void SyncDictionariesToLists()
     {
         characterPosList.Clear();
@@ -128,7 +128,7 @@ public class Data
     }
 }
 
-// 可序列化的键值对类
+// Serializable key-value pair class
 [System.Serializable]
 public class KeyValuePairStringVector3
 {

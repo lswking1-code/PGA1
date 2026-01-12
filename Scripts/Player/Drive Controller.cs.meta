@@ -1,2 +1,20 @@
 fileFormatVersion: 2
 guid: 94490aca7be1eae42bdee293f66c30a0
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - sceneloadEvent: {fileID: 11400000, guid: bbb1d8cf1663dfa41bc1f9ee443dd889, type: 2}
+  - afterSceneLoadedEvent: {fileID: 11400000, guid: fec1fb82551c8ce42bf2f5ba34102b46, type: 2}
+  - LoadDataEvent: {fileID: 11400000, guid: ca0ac8ddb2b9bba42bd64c75cf7c37dc, type: 2}
+  - backToMenuEvent: {fileID: 11400000, guid: 1df9e52e819a5064fa3039a5fe037247, type: 2}
+  - TimeoutEvent: {fileID: 11400000, guid: ba5d621425629394cbdc7b2ac94024de, type: 2}
+  - GasEvent: {fileID: 11400000, guid: 145cf2cfc5106ce46bbb62cf2ad37b49, type: 2}
+  - HPEvent: {fileID: 11400000, guid: 265c868cbe109cb4ab08da231e0cf36b, type: 2}
+  - SaveDataEvent: {fileID: 11400000, guid: 573ec87a031c0454982eb42326993812, type: 2}
+  - inputControl: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

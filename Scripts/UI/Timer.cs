@@ -45,7 +45,7 @@ public class Timer : MonoBehaviour
             return;
         }
         
-        // 直接比较GameSceneSO对象或名称
+        // Directly compare GameSceneSO object or name
         if (sceneToCheck == finalScene || sceneToCheck.name == finalScene.name)
         {
             isFinalScene = true;

@@ -29,23 +29,23 @@ public class UIManager : MonoBehaviour
   {
     HealthEvent.OnEventRaised += OnHealthEvent;
     unloadedSceneEvent.LoadRequestEvent += OnUnLoadedSceneEvent;
-    loadDataEvent.OnEventRaised += OnloadDataEvent;
-    backToMenuEvent.OnEventRaised += OnloadDataEvent;
-    TimeoutEvent.OnEventRaised += OnTimeoutEvent;
-    GameOverEvent.OnEventRaised += OnGameOverEvent;
-    afterSceneLoadedEvent.OnEventRaised += OnAfterSceneLoadedEvent;
-    GameClearEvent.OnEventRaised += OnGameClearEvent;
+    if (loadDataEvent != null) loadDataEvent.AddListener(OnloadDataEvent);
+    if (backToMenuEvent != null) backToMenuEvent.AddListener(OnloadDataEvent);
+    if (TimeoutEvent != null) TimeoutEvent.AddListener(OnTimeoutEvent);
+    if (GameOverEvent != null) GameOverEvent.AddListener(OnGameOverEvent);
+    if (afterSceneLoadedEvent != null) afterSceneLoadedEvent.AddListener(OnAfterSceneLoadedEvent);
+    if (GameClearEvent != null) GameClearEvent.AddListener(OnGameClearEvent);
   }
   private void OnDisable()
   {
     HealthEvent.OnEventRaised -= OnHealthEvent;
     unloadedSceneEvent.LoadRequestEvent -= OnUnLoadedSceneEvent;
-    loadDataEvent.OnEventRaised -= OnloadDataEvent;
-    backToMenuEvent.OnEventRaised -= OnloadDataEvent;
-    TimeoutEvent.OnEventRaised -= OnTimeoutEvent;
-    GameOverEvent.OnEventRaised -= OnGameOverEvent;
-    afterSceneLoadedEvent.OnEventRaised -= OnAfterSceneLoadedEvent;
-    GameClearEvent.OnEventRaised -= OnGameClearEvent;
+    if (loadDataEvent != null) loadDataEvent.RemoveListener(OnloadDataEvent);
+    if (backToMenuEvent != null) backToMenuEvent.RemoveListener(OnloadDataEvent);
+    if (TimeoutEvent != null) TimeoutEvent.RemoveListener(OnTimeoutEvent);
+    if (GameOverEvent != null) GameOverEvent.RemoveListener(OnGameOverEvent);
+    if (afterSceneLoadedEvent != null) afterSceneLoadedEvent.RemoveListener(OnAfterSceneLoadedEvent);
+    if (GameClearEvent != null) GameClearEvent.RemoveListener(OnGameClearEvent);
   }
   private void OnHealthEvent(Character character)
   {

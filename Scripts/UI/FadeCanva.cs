@@ -14,11 +14,11 @@ public class FadeCanva : MonoBehaviour
 
     private void OnEnable()
     {
-        fadeEvent.OnEventRaised += OnFadeEvent;
+        if (fadeEvent != null) fadeEvent.AddListener(OnFadeEvent);
     }
     private void OnDisable()
     {
-        fadeEvent.OnEventRaised -= OnFadeEvent;
+        if (fadeEvent != null) fadeEvent.RemoveListener(OnFadeEvent);
     }
 
     private void OnFadeEvent(Color target, float duration, bool fadeIn)

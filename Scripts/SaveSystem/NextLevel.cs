@@ -25,14 +25,14 @@ public class NextLevel : MonoBehaviour
             return;
         }
         
-        // 检查是否存在下一个顺位的场景
+        // Check if there is a next scene in sequence
         int nextSceneIndex = currentSceneIndex + 1;
         if (nextSceneIndex < allGameScenes.Length && allGameScenes[nextSceneIndex] != null)
         {
             GameSceneSO nextScene = allGameScenes[nextSceneIndex];
             Debug.Log($"Found Next Scene: {nextScene.name} (Index: {nextSceneIndex})");
             
-            // 设置 sceneToGo 并加载
+            // Set sceneToGo and load
             if (sceneToGo == null || sceneToGo.Length == 0)
             {
                 sceneToGo = new GameSceneSO[1];
@@ -43,7 +43,7 @@ public class NextLevel : MonoBehaviour
         else
         {
             Debug.Log($"Scene Not Found (Now Index: {currentSceneIndex}, Array Length: {allGameScenes.Length})");
-            // 广播游戏通关事件
+            // Broadcast game clear event
             /*if (GameClearEvent != null)
             {
                 GameClearEvent.RaiseEvent();
@@ -52,7 +52,7 @@ public class NextLevel : MonoBehaviour
     }
     
     /// <summary>
-    /// 查找当前场景在 allGameScenes 数组中的索引位置（忽略 Persistent 场景）
+    /// Find the index position of current scene in allGameScenes array (ignoring Persistent scene)
     /// </summary>
     private int FindCurrentSceneIndex()
     {

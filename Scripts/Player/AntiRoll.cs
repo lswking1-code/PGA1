@@ -2,7 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// Anti-roll bar compatible with the project's `Wheel` and `Drive` scripts.
-/// 挂到与 Drive 同一 GameObject（或包含 Rigidbody 的父物体）上，配置左右轮对，FixedUpdate 中按悬挂行程差施加抗侧倾力。
+/// Should be placed on the same GameObject as Drive (or the parent GameObject with Rigidbody), works in pairs, applies anti-roll force based on suspension travel in FixedUpdate.
 /// </summary>
 [AddComponentMenu("PGA2/Player/AntiRoll")]
 [RequireComponent(typeof(Rigidbody))]
@@ -41,11 +41,11 @@ public class AntiRoll : MonoBehaviour
             bool groundedL = pair.leftWheel.wheelCollider.GetGroundHit(out leftHit);
             bool groundedR = pair.rightWheel.wheelCollider.GetGroundHit(out rightHit);
 
-            // 默认行程值（与原插件保持一致的初始值）
+            // Default travel value, consistent with original default initial value
             float travelL = 1.0f;
             float travelR = 1.0f;
 
-            // 计算行程（若悬挂距离为 0 则保留默认）
+            // Calculate travel, if not grounded or 0, use default
             float suspL = pair.leftWheel.wheelCollider.suspensionDistance;
             if (groundedL && suspL > 0f)
             {
@@ -58,7 +58,7 @@ public class AntiRoll : MonoBehaviour
                 travelR = (-pair.rightWheel.transform.InverseTransformPoint(rightHit.point).y - pair.rightWheel.wheelCollider.radius) / suspR;
             }
 
-            // 限制行程到 [0,1]，防止异常值影响力的计算
+            // Clamp travel to [0,1] to prevent abnormal values from affecting force calculation
             travelL = Mathf.Clamp01(travelL);
             travelR = Mathf.Clamp01(travelR);
 

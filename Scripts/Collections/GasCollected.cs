@@ -16,7 +16,7 @@ public class GasCollected : MonoBehaviour
     [Header("Animation")]
     private Animator animator;
     
-    private bool isCollected = false; // 防止重复收集的标志
+    private bool isCollected = false; // Flag to prevent duplicate collection
 
     private void Start()
     {
@@ -25,15 +25,15 @@ public class GasCollected : MonoBehaviour
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     /// <summary>
-    /// 当其他Collider进入触发器时调用
+    /// Called when another Collider enters the trigger
     /// </summary>
-    /// <param name="other">进入触发器的Collider</param>
+    /// <param name="other">Collider that entered the trigger</param>
     private void OnTriggerEnter(Collider other)
     {
-        // 检查进入的物体是否为Player
+        // Check if entering object is Player
         if (other.CompareTag("Player"))
         {
-            // 广播事件
+            // Broadcast event
             ResourceEvent.RaiseEvent(amount);
             ResourceCollect();
         }
@@ -57,8 +57,8 @@ public class GasCollected : MonoBehaviour
     }
     public void ResourceCollect()
     {
-        if (isCollected) return; // 如果已经被收集，直接返回
-        isCollected = true; // 标记为已收集
+        if (isCollected) return; // If already collected, return directly
+        isCollected = true; // Mark as collected
         Destroy(gameObject);
     }
     public void ScanFinish()

@@ -12,7 +12,7 @@ public class Scanner : MonoBehaviour
     [Header("Collicion")]
     [Range(0, 1)]
     public float sizeProportion = 0.5f;
-    [Tooltip("控制Collider放大过程的曲线。X轴(0-1)表示时间进度，Y轴(0-1)表示插值值")]
+    [Tooltip("Curve controlling the Collider expansion process. X-axis (0-1) represents time progress, Y-axis (0-1) represents interpolation value")]
     public AnimationCurve expansionCurve = AnimationCurve.Linear(0, 0, 1, 1);
     private Coroutine expandCoroutine;
     
@@ -28,14 +28,14 @@ public class Scanner : MonoBehaviour
         }
         Destroy(Scanner, duration+1);
         
-        // 从实例化的Scanner上获取SphereCollider
+        // Get SphereCollider from instantiated Scanner
         SphereCollider sphereCollider = Scanner.GetComponent<SphereCollider>();
         
         if (sphereCollider != null)
         {
             float initialRadius = sphereCollider.radius;
             
-            // 启动Collider扩展协程
+            // Start Collider expansion coroutine
             if (expandCoroutine != null)
             {
                 StopCoroutine(expandCoroutine);
@@ -45,7 +45,7 @@ public class Scanner : MonoBehaviour
     }
     
     /// <summary>
-    /// 协程：逐渐放大SphereCollider的半径
+    /// Coroutine: Gradually expand SphereCollider radius
     /// </summary>
     System.Collections.IEnumerator ExpandCollider(SphereCollider sphereCollider, float initialRadius, GameObject scannerInstance)
     {
@@ -54,16 +54,16 @@ public class Scanner : MonoBehaviour
         float maxRadius = size * sizeProportion; 
         float elapsedTime = 0f;
         
-        // 从初始半径逐渐放大到最大半径
+        // Gradually expand from initial radius to max radius
         while (elapsedTime < duration && scannerInstance != null)
         {
             elapsedTime += Time.deltaTime;
             float normalizedTime = elapsedTime / duration;
-            // 使用曲线评估插值值
+            // Evaluate interpolation value using curve
             float curveValue = expansionCurve.Evaluate(normalizedTime);
             float currentRadius = Mathf.Lerp(initialRadius, maxRadius, curveValue);
             
-            // 检查实例是否还存在
+            // Check if instance still exists
             if (sphereCollider != null)
             {
                 sphereCollider.radius = currentRadius;
@@ -72,7 +72,7 @@ public class Scanner : MonoBehaviour
             yield return null;
         }
         
-        // 确保最终达到最大半径（如果实例还存在）
+        // Ensure final max radius is reached (if instance still exists)
         if (scannerInstance != null && sphereCollider != null)
         {
             sphereCollider.radius = maxRadius;
@@ -81,13 +81,13 @@ public class Scanner : MonoBehaviour
    
 
     /// <summary>
-    /// 新 Input System 回调：在 InputAction 中绑定的 "Scan" 行为触发时被调用
-    /// 需要在 PlayerInput 上使用对应的 actions，并将此组件挂在同一个 GameObject 上。
+    /// New Input System callback: called when "Scan" action bound in InputAction is triggered
+    /// Requires using corresponding actions on PlayerInput and attaching this component to the same GameObject.
     /// </summary>
-    /// <param name="value">输入值（按键/按钮）</param>
+    /// <param name="value">Input value (key/button)</param>
     public void OnScan(InputValue value)
     {
-        // 按下瞬间触发扫描（避免按住时重复触发）
+        // Trigger scan on press moment (avoid repeated triggers when held)
         if (value.isPressed)
         {
             SpawnScan();

@@ -4,22 +4,22 @@ public class Chasing : MonoBehaviour
 {
     [Header("Collision")]
     [Range(0, 1000)] 
-    public float pushForce = 100f; // 对Player施加的力的大小
+    public float pushForce = 100f; // Force magnitude applied to Player
     [Range(0, 100)] 
-    public float collisionForce = 10f; // 对Chaser施加的力的大小
+    public float collisionForce = 10f; // Force magnitude applied to Chaser
     [Range(0, 1000)] 
-    public float recoilForce = 50f; // 撞击玩家后敌人受到的向后力的大小
+    public float recoilForce = 50f; // Backward force magnitude enemy receives after hitting player
     public float Damage = 10;
     public float SelfDamage = 20;
     
     [Header("Collision Cooldown")]
     [Range(0, 5)]
-    public float collisionCooldown = 1f; // 碰撞冷却时间（秒）
+    public float collisionCooldown = 1f; // Collision cooldown time (in seconds)
     
-    private Rigidbody rb; // Rigidbody 组件，用于物理移动
+    private Rigidbody rb; // Rigidbody component for physics movement
     private Character character;
-    private float lastPlayerCollisionTime = -1f; // 上次与玩家碰撞的时间
-    private float lastChaserCollisionTime = -1f; // 上次与其他Chaser碰撞的时间
+    private float lastPlayerCollisionTime = -1f; // Time of last collision with player
+    private float lastChaserCollisionTime = -1f; // Time of last collision with other Chaser
 
     private void Start()
     {
@@ -34,10 +34,10 @@ public class Chasing : MonoBehaviour
             ChaserCollision(other.gameObject);
     }
 
-    // 处理与其他 Chaser 的碰撞
+    // Handle collision with other Chaser
     private void ChaserCollision(GameObject chaser)
     {
-        // 检查碰撞冷却时间
+        // Check collision cooldown time
         if (Time.time - lastChaserCollisionTime < collisionCooldown)
             return;
         
@@ -52,41 +52,41 @@ public class Chasing : MonoBehaviour
         }
     }
 
-    // 处理与Player的碰撞
+    // Handle collision with Player
     private void PlayerCollision(GameObject player)
     {
-        // 检查碰撞冷却时间
+        // Check collision cooldown time
         if (Time.time - lastPlayerCollisionTime < collisionCooldown)
             return;
         
         lastPlayerCollisionTime = Time.time;
         
-        // 检查 character 是否存在
+        // Check if character exists
         if (character == null)
         {
             Debug.LogWarning("Chasing: Character component is null!");
             return;
         }
         
-        // 计算力的方向（从玩家指向敌人）
+        // Calculate force direction (from player to enemy)
         Vector3 forceDirection = (player.transform.position - transform.position).normalized;
         forceDirection.y = 0;
         
-        // 对Player施加力
+        // Apply force to Player
         Rigidbody playerRb = player.GetComponent<Rigidbody>();
         if (playerRb != null)
         {
             playerRb.AddForce(forceDirection * pushForce, ForceMode.Impulse);
         }
         
-        // 对敌人自身施加向后的力（与玩家受到的力方向相反）
+        // Apply backward force to enemy itself (opposite direction to force on player)
         if (rb != null)
         {
-            Vector3 recoilDirection = -forceDirection; // 向后方向
+            Vector3 recoilDirection = -forceDirection; // Backward direction
             rb.AddForce(recoilDirection * recoilForce, ForceMode.Impulse);
         }
         
-        // 对敌人造成伤害
+        // Deal damage to enemy
         character.TakeDamage(SelfDamage);
     }
 }

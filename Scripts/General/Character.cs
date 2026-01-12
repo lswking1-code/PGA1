@@ -27,15 +27,15 @@ public class Character : MonoBehaviour
     
     private void OnEnable()
     {
-        NewGameEvent.OnEventRaised += OnNewGameEvent;
-        LoadDataEvent.OnEventRaised += OnLoadDataEvent;
-        AfterSceneLoadedEvent.OnEventRaised += OnAfterSceneLoadedEvent;
+        if (NewGameEvent != null) NewGameEvent.AddListener(OnNewGameEvent);
+        if (LoadDataEvent != null) LoadDataEvent.AddListener(OnLoadDataEvent);
+        if (AfterSceneLoadedEvent != null) AfterSceneLoadedEvent.AddListener(OnAfterSceneLoadedEvent);
     }
     private void OnDisable()
     {
-        NewGameEvent.OnEventRaised -= OnNewGameEvent;
-        LoadDataEvent.OnEventRaised -= OnLoadDataEvent; 
-        AfterSceneLoadedEvent.OnEventRaised -= OnAfterSceneLoadedEvent;
+        if (NewGameEvent != null) NewGameEvent.RemoveListener(OnNewGameEvent);
+        if (LoadDataEvent != null) LoadDataEvent.RemoveListener(OnLoadDataEvent); 
+        if (AfterSceneLoadedEvent != null) AfterSceneLoadedEvent.RemoveListener(OnAfterSceneLoadedEvent);
     }
     private void Start()
     {
@@ -70,6 +70,8 @@ public class Character : MonoBehaviour
             Debug.Log("HP is 0");
         }
         OnHealthChange.Invoke(this);
+     
+        OnTakeDamage?.Invoke();
     }
     public void GasRecovery(float amount)
     {

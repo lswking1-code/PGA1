@@ -45,7 +45,7 @@ public class NormalLineFeature : ScriptableRendererFeature
             RenderTextureDescriptor desc = cameraTextureDescriptor;
             cmd.GetTemporaryRT(tempID, desc);
 
-            // 使用RTHandle替换已过时的ConfigureTarget
+            // Use RTHandle to replace deprecated ConfigureTarget
             var rtHandle = UnityEngine.Rendering.RTHandles.Alloc(
                 desc.width, desc.height, 1, DepthBits.None, desc.graphicsFormat,
                 filterMode: FilterMode.Bilinear, wrapMode: TextureWrapMode.Clamp, name: "_NormalTex"
@@ -55,7 +55,7 @@ public class NormalLineFeature : ScriptableRendererFeature
         }
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
-           CommandBuffer cmd = CommandBufferPool.Get("DrawNormalTexPass 绘制法线贴图");
+           CommandBuffer cmd = CommandBufferPool.Get("DrawNormalTexPass Draw Normal Texture");
             using (new ProfilingScope(cmd, new ProfilingSampler("DrawNormalTexPass")))
             {
                 context.ExecuteCommandBuffer(cmd);
@@ -87,7 +87,7 @@ public class NormalLineFeature : ScriptableRendererFeature
         }
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
-            CommandBuffer cmd = CommandBufferPool.Get("DrawNormalLinePass 绘制法线描边");
+            CommandBuffer cmd = CommandBufferPool.Get("DrawNormalLinePass Draw Normal Lines");
             RenderTextureDescriptor desc = renderingData.cameraData.cameraTargetDescriptor;
             setting.normalLineMat.SetFloat("_Edge", setting.Edge);
             int normalLineID = Shader.PropertyToID("_NormalLineTex");
