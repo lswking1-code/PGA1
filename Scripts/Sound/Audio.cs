@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(AudioSource))]
 public class Audio : MonoBehaviour
@@ -23,14 +22,7 @@ public class Audio : MonoBehaviour
     [Tooltip("低于此速度视为空转（idle），用于指定空转时的音量计算阈值")]
     public float IdleThreshold = 0.5f;
 
-    [Header("Background Music (played on scene loaded)")]
-    public AudioClip BackgroundMusic;
-    [Range(0f, 1f)] public float MusicVolume = 0.6f;
-    public bool LoopBackgroundMusic = true;
-    public bool PlayMusicOnSceneLoaded = true;
-
-    private AudioSource audioSource;   // engine source
-    private AudioSource musicSource;   // background music source
+    private AudioSource audioSource;
     private Drive drive;
     private Rigidbody rb;
 
@@ -56,38 +48,13 @@ public class Audio : MonoBehaviour
             return;
         }
 
-        // 创建并配置用于播放背景音乐的 AudioSource（2D 音效）
-        musicSource = gameObject.AddComponent<AudioSource>();
-        musicSource.playOnAwake = false;
-        musicSource.loop = LoopBackgroundMusic;
-        musicSource.spatialBlend = 0f; // 2D 音乐
-        musicSource.volume = Mathf.Clamp01(MusicVolume);
-
         drive = GetComponent<Drive>() ?? GetComponentInParent<Drive>();
         rb = GetComponent<Rigidbody>() ?? GetComponentInParent<Rigidbody>();
     }
 
-    private void OnEnable()
-    {
-        // 订阅场景加载事件以在加载场景后播放背景音乐
-        SceneManager.sceneLoaded += OnSceneLoaded;
-    }
-
-    private void OnDisable()
-    {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
-
-    // SceneManager 回调 — 场景加载完成时触发
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        if (!PlayMusicOnSceneLoaded) return;
-        PlayBackgroundMusic();
-    }
-
-    // 主循环：根据车辆速度调整发动机音量与音调
     void Update()
     {
+        
         float forwardSpeed = 0f;
         if (drive != null)
         {
@@ -95,7 +62,6 @@ public class Audio : MonoBehaviour
         }
         else if (rb != null)
         {
-            // 若项目环境使用不同 API，请替换 linearVelocity 为 velocity
             forwardSpeed = Vector3.Dot(rb.linearVelocity, transform.forward);
         }
         else
@@ -128,14 +94,5 @@ public class Audio : MonoBehaviour
         // 平滑过渡到目标音量和音调
         audioSource.volume = Mathf.MoveTowards(audioSource.volume, targetVolume, Time.deltaTime * 1.5f);
         audioSource.pitch = Mathf.MoveTowards(audioSource.pitch, targetPitch, Time.deltaTime * 1.5f);
-    }
-
-    // 播放背景音乐（可被外部调用）
-    public void PlayBackgroundMusic()
-    {
-        if (BackgroundMusic == null)
-        {
-            Debug.LogWarning($"{nameof(Audio)}: no BackgroundMusic assigned on '{gameObject.name}'.");
-        }
     }
 }
