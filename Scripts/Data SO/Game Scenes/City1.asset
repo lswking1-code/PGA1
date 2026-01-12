@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72a1258aacb132645a8b6f657520bfb4, type: 3}
   m_Name: City1
   m_EditorClassIdentifier: 
+  sceneType: 0
   sceneReference:
-    m_AssetGUID: 99c9720ab356a0642a771bea13969a05
+    m_AssetGUID: bff59a2df610fac44a80a11e84a14ad9
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 
